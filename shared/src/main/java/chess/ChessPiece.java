@@ -1,6 +1,9 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -10,8 +13,9 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
-    public PieceType piece = null;
-    public ChessGame.TeamColor color = null;
+    private PieceType piece = null;
+    private ChessGame.TeamColor color = null;
+
 
 
     public void setPiece(PieceType piece) {
@@ -23,7 +27,8 @@ public class ChessPiece {
     }
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-
+        setPiece(type);
+        setColor(pieceColor);
     }
 
     /**
@@ -64,7 +69,7 @@ public class ChessPiece {
         return switch (piece) {
             case KING -> kingMove();
             case QUEEN -> queenMove();
-            case BISHOP -> bishopMove();
+            case BISHOP -> bishopMove(myPosition);
             case KNIGHT -> knightMove();
             case ROOK -> rookMove();
             case PAWN -> pawnMove();
@@ -79,8 +84,54 @@ public class ChessPiece {
         return null;
     }
 
-    private Collection<ChessMove> bishopMove(){
-        return null;
+    private Collection<ChessMove> bishopMove(ChessPosition position){
+        HashSet<ChessMove> moves = new HashSet<>();
+        int row = position.getRow();
+        int column = position.getColumn();
+
+        // up and to the right
+        while (row < 8 && column < 8) {
+            row++;
+            column++;
+           ChessPosition end = new ChessPosition(row, column);
+           ChessMove pieceMove = new ChessMove(position, end, null);
+           moves.add(pieceMove);
+        }
+
+        // down and to the right
+        row = position.getRow();
+        column = position.getColumn();
+        while (row > 1 && column < 8) {
+            row--;
+            column++;
+            ChessPosition end = new ChessPosition(row, column);
+            ChessMove pieceMove = new ChessMove(position, end, null);
+            moves.add(pieceMove);
+        }
+
+        // down and to the left
+        row = position.getRow();
+        column = position.getColumn();
+        while (row > 1 && column > 1) {
+            row--;
+            column--;
+            ChessPosition end = new ChessPosition(row, column);
+            ChessMove pieceMove = new ChessMove(position, end, null);
+            moves.add(pieceMove);
+        }
+
+        // up and to the right
+        row = position.getRow();
+        column = position.getColumn();
+        while (row < 8 && column > 1) {
+            row++;
+            column--;
+            ChessPosition end = new ChessPosition(row, column);
+            ChessMove pieceMove = new ChessMove(position, end, null);
+            moves.add(pieceMove);
+        }
+
+        return moves;
     }
 
     private Collection<ChessMove> knightMove(){
@@ -95,4 +146,24 @@ public class ChessPiece {
         return null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return piece == that.piece && color == that.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(piece, color);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "piece=" + piece +
+                ", color=" + color +
+                '}';
+    }
 }
