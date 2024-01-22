@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -67,7 +66,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
         return switch (piece) {
-            case KING -> kingMove();
+            case KING -> kingMove(board, myPosition);
             case QUEEN -> queenMove(board, myPosition);
             case BISHOP -> bishopMove(board, myPosition);
             case KNIGHT -> knightMove(board, myPosition);
@@ -76,8 +75,68 @@ public class ChessPiece {
         };
     }
 
-    private Collection<ChessMove> kingMove(){
-        return null;
+    private Collection<ChessMove> kingMove(ChessBoard board, ChessPosition position){
+        HashSet<ChessMove> moves = new HashSet<>();
+        int row = position.getRow();
+        int column = position.getColumn();
+
+        // up
+        row++;
+        if (row <= 8){
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+
+        // up and right
+        column++;
+        if (row <= 8) {
+            if (column <= 8) {
+                singleCollisionCheck(board, position, moves, row, column);
+            }
+        }
+
+        // right
+        row--;
+        if (column <= 8){
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+
+        // down and right
+        row--;
+        if (row >= 1) {
+            if (column <= 8) {
+                singleCollisionCheck(board, position, moves, row, column);
+            }
+        }
+
+        // down
+        column--;
+        if (row >= 1) {
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+
+        // down and left
+        column--;
+        if (row >= 1) {
+            if (column >= 1) {
+                singleCollisionCheck(board, position, moves, row, column);
+            }
+        }
+
+        // left
+        row++;
+        if (column >= 1) {
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+
+        // up and left
+        row++;
+        if (row <= 8) {
+            if (column >= 1) {
+                singleCollisionCheck(board, position, moves, row, column);
+            }
+        }
+
+        return moves;
     }
 
     private Collection<ChessMove> queenMove(ChessBoard board, ChessPosition position){
@@ -201,19 +260,17 @@ public class ChessPiece {
         int row = position.getRow();
         int column = position.getColumn();
 
-
         // up and right/left
-
         row += 2;
         if (row <= 8) {
             column ++;
             if (column <= 8){
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
 
             column -= 2;
             if (column >= 1){
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
         }
 
@@ -225,15 +282,14 @@ public class ChessPiece {
         if (column <= 8){
             row++;
             if (row <= 8) {
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
 
             row -= 2;
             if (row >= 1) {
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
         }
-
 
         // down and right/left
         row = position.getRow();
@@ -243,15 +299,14 @@ public class ChessPiece {
         if (row >= 1){
             column++;
             if (column <= 8) {
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
 
             column -= 2;
             if (column >= 1) {
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
         }
-
 
         // left and up/down
         row = position.getRow();
@@ -261,19 +316,19 @@ public class ChessPiece {
         if (column >= 1){
             row++;
             if (row <= 8) {
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
 
             row -= 2;
             if (row >= 1) {
-                knightCheck(board, position, moves, row, column);
+                singleCollisionCheck(board, position, moves, row, column);
             }
         }
 
         return moves;
     }
 
-    private void knightCheck(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
+    private void singleCollisionCheck(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
         ChessPosition end = new ChessPosition(row, column);
 
         if (board.getPiece(end) == null) {
