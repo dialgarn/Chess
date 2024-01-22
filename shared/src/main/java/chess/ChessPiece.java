@@ -70,7 +70,7 @@ public class ChessPiece {
             case KING -> kingMove();
             case QUEEN -> queenMove(board, myPosition);
             case BISHOP -> bishopMove(board, myPosition);
-            case KNIGHT -> knightMove();
+            case KNIGHT -> knightMove(board, myPosition);
             case ROOK -> rookMove(board, myPosition);
             case PAWN -> pawnMove();
         };
@@ -81,13 +81,16 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> queenMove(ChessBoard board, ChessPosition position){
-        HashSet<ChessMove> queenMoves = new HashSet<>();
-        queenMoves = (HashSet<ChessMove>) bishopMove(board, position);
 
-        HashSet<ChessMove> straightMoves = new HashSet<>();
-        straightMoves = (HashSet<ChessMove>) rookMove(board, position);
+        // gets the diagonal move set by calling bishopMove
+        HashSet<ChessMove> queenMoves = (HashSet<ChessMove>) bishopMove(board, position);
 
+        // gets the straight move set by calling rookMove
+        HashSet<ChessMove> straightMoves = (HashSet<ChessMove>) rookMove(board, position);
+
+        // combines the two move sets
         queenMoves.addAll(straightMoves);
+
         return queenMoves;
     }
 
@@ -193,8 +196,93 @@ public class ChessPiece {
         return moves;
     }
 
-    private Collection<ChessMove> knightMove(){
-        return null;
+    private Collection<ChessMove> knightMove(ChessBoard board, ChessPosition position){
+        HashSet<ChessMove> moves = new HashSet<>();
+        int row = position.getRow();
+        int column = position.getColumn();
+
+
+        // up and right/left
+
+        row += 2;
+        if (row <= 8) {
+            column ++;
+            if (column <= 8){
+                knightCheck(board, position, moves, row, column);
+            }
+
+            column -= 2;
+            if (column >= 1){
+                knightCheck(board, position, moves, row, column);
+            }
+        }
+
+        // right and up/down
+        row = position.getRow();
+        column = position.getColumn();;
+
+        column += 2;
+        if (column <= 8){
+            row++;
+            if (row <= 8) {
+                knightCheck(board, position, moves, row, column);
+            }
+
+            row -= 2;
+            if (row >= 1) {
+                knightCheck(board, position, moves, row, column);
+            }
+        }
+
+
+        // down and right/left
+        row = position.getRow();
+        column = position.getColumn();;
+
+        row -= 2;
+        if (row >= 1){
+            column++;
+            if (column <= 8) {
+                knightCheck(board, position, moves, row, column);
+            }
+
+            column -= 2;
+            if (column >= 1) {
+                knightCheck(board, position, moves, row, column);
+            }
+        }
+
+
+        // left and up/down
+        row = position.getRow();
+        column = position.getColumn();;
+
+        column -= 2;
+        if (column >= 1){
+            row++;
+            if (row <= 8) {
+                knightCheck(board, position, moves, row, column);
+            }
+
+            row -= 2;
+            if (row >= 1) {
+                knightCheck(board, position, moves, row, column);
+            }
+        }
+
+        return moves;
+    }
+
+    private void knightCheck(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
+        ChessPosition end = new ChessPosition(row, column);
+
+        if (board.getPiece(end) == null) {
+            ChessMove pieceMove = new ChessMove(position, end, null);
+            moves.add(pieceMove);
+        } else if (color != board.getPiece(end).color) {
+            ChessMove pieceMove = new ChessMove(position, end, null);
+            moves.add(pieceMove);
+        }
     }
 
     private Collection<ChessMove> rookMove(ChessBoard board, ChessPosition position){
