@@ -69,7 +69,7 @@ public class ChessPiece {
         return switch (piece) {
             case KING -> kingMove();
             case QUEEN -> queenMove();
-            case BISHOP -> bishopMove(myPosition);
+            case BISHOP -> bishopMove(board, myPosition);
             case KNIGHT -> knightMove();
             case ROOK -> rookMove();
             case PAWN -> pawnMove();
@@ -84,7 +84,7 @@ public class ChessPiece {
         return null;
     }
 
-    private Collection<ChessMove> bishopMove(ChessPosition position){
+    private Collection<ChessMove> bishopMove(ChessBoard board, ChessPosition position){
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
@@ -93,9 +93,22 @@ public class ChessPiece {
         while (row < 8 && column < 8) {
             row++;
             column++;
-           ChessPosition end = new ChessPosition(row, column);
-           ChessMove pieceMove = new ChessMove(position, end, null);
-           moves.add(pieceMove);
+            ChessPosition end = new ChessPosition(row, column);
+
+            if (board.getPiece(end) == null) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                continue;
+            }
+            if (color != board.getPiece(end).color) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                break;
+            }
+
+            if (color == board.getPiece(end).color) {
+                break;
+            }
         }
 
         // down and to the right
@@ -105,8 +118,21 @@ public class ChessPiece {
             row--;
             column++;
             ChessPosition end = new ChessPosition(row, column);
-            ChessMove pieceMove = new ChessMove(position, end, null);
-            moves.add(pieceMove);
+
+            if (board.getPiece(end) == null) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                continue;
+            }
+            if (color != board.getPiece(end).color) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                break;
+            }
+
+            if (color == board.getPiece(end).color) {
+                break;
+            }
         }
 
         // down and to the left
@@ -116,8 +142,21 @@ public class ChessPiece {
             row--;
             column--;
             ChessPosition end = new ChessPosition(row, column);
-            ChessMove pieceMove = new ChessMove(position, end, null);
-            moves.add(pieceMove);
+
+            if (board.getPiece(end) == null) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                continue;
+            }
+            if (color != board.getPiece(end).color) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                break;
+            }
+
+            if (color == board.getPiece(end).color) {
+                break;
+            }
         }
 
         // up and to the right
@@ -127,8 +166,21 @@ public class ChessPiece {
             row++;
             column--;
             ChessPosition end = new ChessPosition(row, column);
-            ChessMove pieceMove = new ChessMove(position, end, null);
-            moves.add(pieceMove);
+
+            if (board.getPiece(end) == null) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                continue;
+            }
+            if (color != board.getPiece(end).color) {
+                ChessMove pieceMove = new ChessMove(position, end, null);
+                moves.add(pieceMove);
+                break;
+            }
+
+            if (color == board.getPiece(end).color) {
+                break;
+            }
         }
 
         return moves;
