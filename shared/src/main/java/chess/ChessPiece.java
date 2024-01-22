@@ -276,7 +276,7 @@ public class ChessPiece {
 
         // right and up/down
         row = position.getRow();
-        column = position.getColumn();;
+        column = position.getColumn();
 
         column += 2;
         if (column <= 8){
@@ -293,7 +293,7 @@ public class ChessPiece {
 
         // down and right/left
         row = position.getRow();
-        column = position.getColumn();;
+        column = position.getColumn();
 
         row -= 2;
         if (row >= 1){
@@ -310,7 +310,7 @@ public class ChessPiece {
 
         // left and up/down
         row = position.getRow();
-        column = position.getColumn();;
+        column = position.getColumn();
 
         column -= 2;
         if (column >= 1){
@@ -451,7 +451,7 @@ public class ChessPiece {
             // check for promotion
             if (row == 8){
                 ChessPosition end = new ChessPosition(row, column);
-                pawnPromotion(board, position, moves, end);
+                pawnPromotion(position, moves, end);
             } else { // normal move
                 canMove = pawnAdvanceCheck(board, position, moves, row, column);
                 // initial start can move 2 spots
@@ -474,7 +474,7 @@ public class ChessPiece {
                     ChessPosition end = new ChessPosition(row, column);
                     if (board.getPiece(end) != null) {
                         if (color != board.getPiece(end).color) {
-                            pawnPromotion(board, position, moves, end);
+                            pawnPromotion(position, moves, end);
                         }
                     }
                 } else {
@@ -494,7 +494,7 @@ public class ChessPiece {
                     ChessPosition end = new ChessPosition(row, column);
                     if (board.getPiece(end) != null) {
                         if (color != board.getPiece(end).color) {
-                            pawnPromotion(board, position, moves, end);
+                            pawnPromotion(position, moves, end);
                         }
                     }
                 } else {
@@ -515,7 +515,7 @@ public class ChessPiece {
             // check for promotion
             if (row == 1){
                 ChessPosition end = new ChessPosition(row, column);
-                pawnPromotion(board, position, moves, end);
+                pawnPromotion(position, moves, end);
             } else { // normal move
                 canMove = pawnAdvanceCheck(board, position, moves, row, column);
                 // initial start can move 2 spots
@@ -537,7 +537,7 @@ public class ChessPiece {
                     ChessPosition end = new ChessPosition(row, column);
                     if (board.getPiece(end) != null) {
                         if (color != board.getPiece(end).color) {
-                            pawnPromotion(board, position, moves, end);
+                            pawnPromotion(position, moves, end);
                         }
                     }
                 } else {
@@ -557,7 +557,7 @@ public class ChessPiece {
                     ChessPosition end = new ChessPosition(row, column);
                     if (board.getPiece(end) != null) {
                         if (color != board.getPiece(end).color) {
-                            pawnPromotion(board, position, moves, end);
+                            pawnPromotion(position, moves, end);
                         }
                     }
                 } else {
@@ -575,7 +575,7 @@ public class ChessPiece {
         return moves;
     }
 
-    private void pawnPromotion(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, ChessPosition end) {
+    private void pawnPromotion(ChessPosition position, HashSet<ChessMove> moves, ChessPosition end) {
         ChessMove pieceMove = new ChessMove(position, end, PieceType.QUEEN);
         moves.add(pieceMove);
 
