@@ -68,7 +68,7 @@ public class ChessPiece {
 
         return switch (piece) {
             case KING -> kingMove();
-            case QUEEN -> queenMove();
+            case QUEEN -> queenMove(board, myPosition);
             case BISHOP -> bishopMove(board, myPosition);
             case KNIGHT -> knightMove();
             case ROOK -> rookMove(board, myPosition);
@@ -80,8 +80,15 @@ public class ChessPiece {
         return null;
     }
 
-    private Collection<ChessMove> queenMove(){
-        return null;
+    private Collection<ChessMove> queenMove(ChessBoard board, ChessPosition position){
+        HashSet<ChessMove> queenMoves = new HashSet<>();
+        queenMoves = (HashSet<ChessMove>) bishopMove(board, position);
+
+        HashSet<ChessMove> straightMoves = new HashSet<>();
+        straightMoves = (HashSet<ChessMove>) rookMove(board, position);
+
+        queenMoves.addAll(straightMoves);
+        return queenMoves;
     }
 
     private Collection<ChessMove> bishopMove(ChessBoard board, ChessPosition position){
