@@ -1,8 +1,7 @@
 package chess;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
+
 
 /**
  * Represents a single chess piece
@@ -79,7 +78,7 @@ public class ChessPiece {
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
-
+        
         // up
         row++;
         if (row <= 8){
@@ -167,15 +166,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -191,15 +186,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -215,15 +206,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -239,15 +226,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -354,15 +337,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -377,15 +356,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -400,15 +375,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -423,15 +394,11 @@ public class ChessPiece {
             if (board.getPiece(end) == null) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
-                continue;
-            }
-            if (color != board.getPiece(end).color) {
+            } else if (color != board.getPiece(end).color) {
                 ChessMove pieceMove = new ChessMove(position, end, null);
                 moves.add(pieceMove);
                 break;
-            }
-
-            if (color == board.getPiece(end).color) {
+            } else if (color == board.getPiece(end).color) {
                 break;
             }
         }
@@ -455,11 +422,9 @@ public class ChessPiece {
             } else { // normal move
                 canMove = pawnAdvanceCheck(board, position, moves, row, column);
                 // initial start can move 2 spots
-                if (position.getRow() == 2) {
-                    if (canMove) {
-                        row++;
-                        pawnAdvanceCheck(board, position, moves, row, column);
-                    }
+                if (position.getRow() == 2 && canMove) {
+                    row++;
+                    pawnAdvanceCheck(board, position, moves, row, column);
                 }
             }
 

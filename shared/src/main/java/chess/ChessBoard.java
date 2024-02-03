@@ -8,7 +8,7 @@ import java.util.Arrays;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable {
     private ChessPiece[][] board;
 
     public ChessBoard() {
@@ -38,11 +38,34 @@ public class ChessBoard {
     }
 
     /**
+     * Gets the position of the first instance of a piece
+     *
+     * @param piece The type of the piece to be found
+     * @param color The color of the piece you want to find
+     * @return The location of the piece
+     */
+    public ChessPosition getPiece(ChessPiece.PieceType piece, ChessGame.TeamColor color) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPosition pieceLocation = new ChessPosition(i + 1, j + 1);
+                ChessPiece targetPiece = getPiece(pieceLocation);
+                if (targetPiece == null) {
+                    continue;
+                }
+                if (targetPiece.getPieceType() == piece && targetPiece.getTeamColor() == color) {
+                    return pieceLocation;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        board = new ChessPiece[8][8];
+        wipeBoard();
 
         // Team White
         addPiece(new ChessPosition(1,1), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
@@ -83,6 +106,10 @@ public class ChessBoard {
         addPiece(new ChessPosition(7,8), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
     }
 
+    private void wipeBoard() {
+        board = new ChessPiece[8][8];
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -101,5 +128,21 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public ChessBoard clone() {
+        try {
+            ChessBoard clone = (ChessBoard) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            clone.board = new ChessPiece[this.board.length][this.board[0].length];
+            for (int i = 0; i < this.board.length; i++) {
+                clone.board[i] = Arrays.copyOf(this.board[i], this.board[i].length);
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }
