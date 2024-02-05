@@ -15,8 +15,6 @@ public class ChessGame {
     private ChessBoard board;
 
     public ChessGame() {
-        // setTeamTurn(TeamColor.WHITE);
-
     }
 
     /**
@@ -59,15 +57,18 @@ public class ChessGame {
             HashSet<ChessMove> moves = (HashSet<ChessMove>) piece.pieceMoves(getBoard(), startPosition);
             HashSet<ChessMove> validMoveSet = (HashSet<ChessMove>) moves.clone();
             ChessBoard currentBoard = board.clone();
-            // boolean inCheck = isInCheck(piece.getTeamColor());
+
+            // for each possible move, make the move and check if it will result in your team being in check
 
             for (ChessMove move : moves) {
                 board.addPiece(move.getStartPosition(), null);
                 board.addPiece(move.getEndPosition(), piece);
 
+                // if team in check, remove that move from the set of valid moves
                 if (isInCheck(piece.getTeamColor())) {
                     validMoveSet.remove(move);
                 }
+                // reset board and go on to the next move
                 board = currentBoard.clone();
             }
             
@@ -85,16 +86,25 @@ public class ChessGame {
         ChessPiece piece = getBoard().getPiece(move.getStartPosition());
         HashSet<ChessMove> validMoveSet = (HashSet<ChessMove>) validMoves(move.getStartPosition());
 
+        // checks to make sure it is your turn to make a move
         if (piece.getTeamColor() != team) {
             throw new InvalidMoveException("Invalid Make Move");
         }
 
+        // if move is valid...
         if (validMoveSet.contains(move)) {
+            // make current location null
             board.addPiece(move.getStartPosition(), null);
+
+            // checks to see if it will be promoted or not (for pawns only)
             if (move.getPromotionPiece() != null) {
                 piece.setPiece(move.getPromotionPiece());
             }
+
+            // set the new location of the piece
             board.addPiece(move.getEndPosition(), piece);
+
+            // swap turn
             if (team == TeamColor.WHITE) {
                 setTeamTurn(TeamColor.BLACK);
             } else {
@@ -117,6 +127,7 @@ public class ChessGame {
         ChessPosition kingPosition = getBoard().getPiece(ChessPiece.PieceType.KING, teamColor);
         HashSet<ChessMove> attackMoves = new HashSet<>();
 
+        // gets the possible moves of all opposing team's pieces
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPiece piece = getBoard().getPiece(new ChessPosition(i, j));
@@ -130,6 +141,7 @@ public class ChessGame {
         }
 
 
+        // if any move can attack the kings current position, team is in check
         for (ChessMove attack: attackMoves) {
             if (attack.getEndPosition().equals(kingPosition)) {
                 return true;
@@ -150,6 +162,7 @@ public class ChessGame {
         HashSet<ChessMove> possibleMoves = (HashSet<ChessMove>) validMoves(kingPosition);
         boolean currentlyInCheck = isInCheck(teamColor);
 
+        // if currently in check and cant make any possible moves, is in checkmate
         return currentlyInCheck && possibleMoves.isEmpty();
     }
 
@@ -165,6 +178,7 @@ public class ChessGame {
         HashSet<ChessMove> possibleMoves = (HashSet<ChessMove>) validMoves(kingPosition);
         boolean currentlyInCheck = isInCheck(teamColor);
 
+        // if not currently in check but cant make moves, its a stalemate
         return !currentlyInCheck && possibleMoves.isEmpty();
     }
 
