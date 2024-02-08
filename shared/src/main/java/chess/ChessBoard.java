@@ -42,7 +42,7 @@ public class ChessBoard implements Cloneable {
      *
      * @param piece The type of the piece to be found
      * @param color The color of the piece you want to find
-     * @return The location of the piece
+     * @return The location of the piece, or null if no piece of that type exists
      */
     public ChessPosition getPiece(ChessPiece.PieceType piece, ChessGame.TeamColor color) {
         for (int i = 0; i < 8; i++) {
