@@ -110,7 +110,6 @@ public class ChessGame {
             } else {
                 setTeamTurn(TeamColor.WHITE);
             }
-            return;
         } else {
             throw new InvalidMoveException("Invalid Make Move");
         }
@@ -178,7 +177,7 @@ public class ChessGame {
         HashSet<ChessMove> possibleMoves = (HashSet<ChessMove>) validMoves(kingPosition);
         boolean currentlyInCheck = isInCheck(teamColor);
 
-        // if not currently in check but cant make moves, its a stalemate
+        // if not currently in check but cant make moves, it's a stalemate
         return !currentlyInCheck && possibleMoves.isEmpty();
     }
 
