@@ -1,4 +1,4 @@
-package service;
+package serviceTests;
 
 public class GameService {
 }
