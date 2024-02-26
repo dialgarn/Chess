@@ -1,18 +1,18 @@
-package serviceTests;
+package service;
 
-import dataAccess.UserDataAccess;
-import model.AuthData;
+import dataAccess.DataAccessException;
+import dataAccess.UserDAO;
 import model.UserData;
 
 public class UserService {
 
-    private final UserDataAccess dataAccess;
+    private final UserDAO dataAccess;
 
-    public UserService(UserDataAccess dataAccess) {
+    public UserService(UserDAO dataAccess) {
         this.dataAccess = dataAccess;
     }
 
-    public AuthData registerUser(UserData user) {
+    public UserData registerUser(UserData user) throws DataAccessException {
         return dataAccess.registerUser(user);
     }
 

@@ -1,9 +1,11 @@
 package serviceTests;
 
-import dataAccess.UserMemoryDAO;
+import dataAccess.DataAccessException;
+import dataAccess.MemoryUserDAO;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import service.UserService;
 
 class UserServiceTest {
 
@@ -12,8 +14,8 @@ class UserServiceTest {
     }
 
     @Test
-    void clear() {
-        var myObject = new UserService(new UserMemoryDAO());
+    void clear() throws DataAccessException {
+        var myObject = new UserService(new MemoryUserDAO());
 
         myObject.registerUser(new UserData("testUser", "123", "test@test.com"));
         myObject.clear();

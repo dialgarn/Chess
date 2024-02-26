@@ -1,14 +1,22 @@
 package server;
 
 import com.google.gson.Gson;
-import dataAccess.UserMemoryDAO;
+import dataAccess.DataAccessException;
+import dataAccess.MemoryAuthDAO;
+import dataAccess.MemoryGameDAO;
+import dataAccess.MemoryUserDAO;
+import model.AuthData;
 import model.UserData;
-import serviceTests.UserService;
+import service.AuthService;
+import service.GameService;
+import service.UserService;
 import spark.*;
 
 public class Server {
 
-    private final UserService userService = new UserService(new UserMemoryDAO());
+    private final UserService userService = new UserService(new MemoryUserDAO());
+    private final AuthService authService = new AuthService(new MemoryAuthDAO());
+    private final GameService gameService = new GameService(new MemoryGameDAO());
 
     public Server() {}
 
@@ -33,14 +41,28 @@ public class Server {
     private Object clear(Request request, Response response) {
         userService.clear();
         response.status(200);
-        return "successfully cleared the database\n";
+        return "";
     }
 
-    private Object register(Request request, Response response) {
-        var user = new Gson().fromJson(request.body(), UserData.class);
-        // user = userService.registerUser(user) ;
-        // webSocketHandler.makeNoise(pet.name(), pet.sound());
-        return new Gson().toJson(user);
+    /**
+     * Registers a new user if one does not already exist with the given username
+     * @param request .
+     * @param response .
+     * @return authData (username and authToken
+     */
+    private Object register(Request request, Response response) throws DataAccessException {
+        try {
+            var user = new Gson().fromJson(request.body(), UserData.class);
+            user = userService.registerUser(user);
+            AuthData auth = authService.createAuth(user);
+            // webSocketHandler.makeNoise(pet.name(), pet.sound());
+            return new Gson().toJson(auth);
+        } catch (Throwable e) {
+            if (e.getMessage().equals("Bad Request")) {
+                response.status(400);
+            }
+            return response;
+        }
     }
 
 //    private Object clear(Request request, Response response) {

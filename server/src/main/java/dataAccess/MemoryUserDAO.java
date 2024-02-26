@@ -1,30 +1,28 @@
 package dataAccess;
 
-import model.AuthData;
 import model.UserData;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
-public class UserMemoryDAO implements UserDataAccess {
+public class MemoryUserDAO implements UserDAO {
 
     private final HashMap<String, UserData> userList = new HashMap<>();
 
-    public AuthData registerUser(UserData user) {
+    public UserData registerUser(UserData user) throws DataAccessException {
 
         if (getUser(user) == null) {
-            userList.put(user.getUsername(), user);
-            return null;
+            userList.put(user.username(), user);
+            return user;
         } else {
-            return null;
+            throw new DataAccessException("Bad Request");
         }
     }
 
-    public UserData getUser(UserData user) {
+    public UserData getUser(UserData user) throws DataAccessException {
         // checks to see if the passed in user (username) already exists. if it does, returns the user information
         for (HashMap.Entry<String, UserData> entry : userList.entrySet()) {
-            if (Objects.equals(entry.getValue().getUsername(), user.getUsername())) {
+            if (Objects.equals(entry.getValue().username(), user.username())) {
                 return user;
             }
         }
