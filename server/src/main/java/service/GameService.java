@@ -1,5 +1,7 @@
 package service;
 
+import chess.ChessGame;
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
 import model.GameData;
@@ -18,11 +20,15 @@ public class GameService {
         return this.dataAccess.createGame(gameName);
     }
 
-    public void joinGame() {
-        this.dataAccess.joinGame();
+    public void joinGame(int gameID, ChessGame.TeamColor playerColor, String playerName) throws DataAccessException {
+        this.dataAccess.joinGame(gameID, playerColor, playerName);
     }
 
     public Collection<GameData> listGames() {
         return this.dataAccess.listGames();
+    }
+
+    public void clear() {
+        this.dataAccess.clear();
     }
 }

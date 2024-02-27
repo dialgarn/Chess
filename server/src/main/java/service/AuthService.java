@@ -24,7 +24,11 @@ public class AuthService {
         this.dataAccess.deleteAuth(authToken);
     }
 
-    public void verify(String authToken) throws DataAccessException {
-        this.dataAccess.verify(authToken);
+    public AuthData verify(String authToken) throws DataAccessException {
+        return this.dataAccess.verify(authToken);
+    }
+
+    public void clear() {
+        this.dataAccess.clear();
     }
 }

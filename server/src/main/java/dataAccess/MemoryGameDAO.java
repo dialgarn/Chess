@@ -16,11 +16,38 @@ public class MemoryGameDAO implements GameDAO {
         gameCounter += 1;
         return game.gameID();
     }
-    public void joinGame() {
-
+    public void joinGame(int gameID, ChessGame.TeamColor playerColor, String playerName) throws DataAccessException {
+        for (GameData game : gameList) {
+            if (game.gameID() == gameID) {
+                if (playerColor == ChessGame.TeamColor.WHITE) {
+                    if (game.whiteUsername() != null) {
+                        throw new DataAccessException("Already Taken");
+                    }
+                    GameData newGame = new GameData(gameID, playerName, null, game.gameName(), game.game());
+                    gameList.remove(game);
+                    gameList.add(newGame);
+                    return;
+                } else if (playerColor == ChessGame.TeamColor.BLACK) {
+                    if (game.blackUsername() != null) {
+                        throw new DataAccessException("Already Taken");
+                    }
+                    GameData newGame = new GameData(gameID, null, playerName, game.gameName(), game.game());
+                    gameList.remove(game);
+                    gameList.add(newGame);
+                    return;
+                } else {
+                    return;
+                }
+            }
+        }
+        throw new DataAccessException("Bad Request");
     }
 
     public Collection<GameData> listGames() {
         return gameList;
+    }
+
+    public void clear() {
+        gameList.clear();
     }
 }

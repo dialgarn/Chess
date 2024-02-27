@@ -24,6 +24,16 @@ class UserServiceTest {
     }
 
     @Test
+    void registerUserFail() throws DataAccessException {
+        var myObject = new  UserService(new MemoryUserDAO());
+        UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
+
+        myObject.registerUser(user1);
+
+        Assertions.assertThrows(DataAccessException.class, ()->myObject.registerUser(user1));
+    }
+
+    @Test
     void clear() throws DataAccessException {
         var myObject = new UserService(new MemoryUserDAO());
 

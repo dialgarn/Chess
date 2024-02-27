@@ -10,6 +10,8 @@ public interface AuthDAO {
 
     void deleteAuth(String authToken) throws DataAccessException;
 
-    void verify(String authToken) throws DataAccessException;
+    AuthData verify(String authToken) throws DataAccessException;
+
+    void clear();
 }
 

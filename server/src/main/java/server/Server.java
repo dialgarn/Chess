@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -37,12 +38,7 @@ public class Server {
         Spark.delete("/session", this::logout);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::join);
-        // Spark.get("/game", this::listGames);
-        // get
-        // post
-        // put
-        // delete
-
+        Spark.get("/game", this::listGames);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -72,13 +68,16 @@ public class Server {
     private Object join(Request request, Response response) {
         try {
             var authToken = request.headers("Authorization");
-            authService.verify(authToken);
+            AuthData user = authService.verify(authToken);
             var requestBodyJson = new Gson().fromJson(request.body(), JsonObject.class);
-            String playerColor = requestBodyJson.get("playerColor").getAsString();
+            ChessGame.TeamColor playerColor = null;
+            if (requestBodyJson.get("playerColor") != null) {
+                playerColor = ChessGame.TeamColor.valueOf(requestBodyJson.get("playerColor").getAsString());
+            }
             int gameID = requestBodyJson.get("gameID").getAsInt();
-            gameService.joinGame();
+            gameService.joinGame(gameID, playerColor, user.username());
             response.status(200);
-            return String.format("{\"gameID\": \"%d\" }", gameID);
+            return "{}";
         } catch (Throwable e) {
             return errorHandling(request, response, e);
         }
@@ -89,7 +88,10 @@ public class Server {
             var authToken = request.headers("Authorization");
             authService.verify(authToken);
             var requestBodyJson = new Gson().fromJson(request.body(), JsonObject.class);
-            String gameName = requestBodyJson.get("gameName").getAsString();
+            String gameName = null;
+            if (requestBodyJson.get("gameName") != null) {
+                gameName = requestBodyJson.get("gameName").getAsString();
+            }
             int gameID = gameService.createGame(gameName);
             response.status(200);
             return String.format("{\"gameID\": \"%d\" }", gameID);
@@ -123,6 +125,8 @@ public class Server {
 
     private Object clear(Request request, Response response) {
         userService.clear();
+        gameService.clear();
+        authService.clear();
         response.status(200);
         return "{}";
     }
