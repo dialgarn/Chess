@@ -36,4 +36,13 @@ public class MemoryAuthDAO implements AuthDAO {
         }
         throw new DataAccessException("Unauthorized");
     }
+
+    public void verify(String authToken) throws DataAccessException {
+        for (AuthData auth : authList) {
+            if (Objects.equals(auth.authToken(), authToken)) {
+                return;
+            }
+        }
+        throw new DataAccessException("Unauthorized");
+    }
 }

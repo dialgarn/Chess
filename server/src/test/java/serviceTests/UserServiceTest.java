@@ -10,10 +10,17 @@ import service.UserService;
 class UserServiceTest {
 
     @Test
-    void registerUser() {
+    void registerUser() throws DataAccessException {
         var myObject = new  UserService(new MemoryUserDAO());
+        UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
+        UserData user2 = new UserData("user2", "password2", "user2@gmail.com");
 
-        // myObject.registerUser()
+        myObject.registerUser(user1);
+        myObject.registerUser(user2);
+
+        int size = myObject.getSize();
+
+        Assertions.assertEquals(2, size);
     }
 
     @Test
