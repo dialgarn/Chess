@@ -2,6 +2,9 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
+import dataAccess.DataAccessException;
+
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
@@ -34,7 +37,12 @@ public class Server {
         Spark.delete("/session", this::logout);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::join);
-        Spark.get("/game", this::listGames);
+        // Spark.get("/game", this::listGames);
+        // get
+        // post
+        // put
+        // delete
+
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -44,12 +52,15 @@ public class Server {
         try {
             var authToken = request.headers("Authorization");
             authService.verify(authToken);
-             HashSet<GameData> games = (HashSet<GameData>) gameService.listGames();
+
+            HashSet<GameData> games = (HashSet<GameData>) gameService.listGames();
+
             response.status(200);
             String output = "{\"games\": [";
             for (GameData game : games) {
                 output += String.format("{\"gameID\": %d, \"whiteUsername\":%s, \"blackUsername\":%s, \"gameName\":%s} "
-                                        , game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName());
+                        , game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName());
+
             }
             output += "]}";
             return output;
@@ -155,6 +166,7 @@ public class Server {
             return "{\"message\": \"Error: Unknown\" }"; // Provide a default error message
         }
     }
+
     public int port() {
         return Spark.port();
     }

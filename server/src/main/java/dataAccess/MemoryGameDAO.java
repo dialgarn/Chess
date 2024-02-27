@@ -16,7 +16,6 @@ public class MemoryGameDAO implements GameDAO {
         gameCounter += 1;
         return game.gameID();
     }
-
     public void joinGame() {
 
     }

@@ -21,7 +21,6 @@ class UserServiceTest {
         int size = myObject.getSize();
 
         Assertions.assertEquals(2, size);
-
     }
 
     @Test
