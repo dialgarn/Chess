@@ -3,7 +3,6 @@ package dataAccess;
 import model.AuthData;
 import model.UserData;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -31,6 +30,15 @@ public class MemoryAuthDAO implements AuthDAO {
         for (AuthData auth : authList) {
             if (Objects.equals(auth.authToken(), authToken)) {
                 authList.remove(auth);
+                return;
+            }
+        }
+        throw new DataAccessException("Unauthorized");
+    }
+
+    public void verify(String authToken) throws DataAccessException {
+        for (AuthData auth : authList) {
+            if (Objects.equals(auth.authToken(), authToken)) {
                 return;
             }
         }
