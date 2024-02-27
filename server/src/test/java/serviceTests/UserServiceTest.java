@@ -11,6 +11,9 @@ class UserServiceTest {
 
     @Test
     void registerUser() {
+        var myObject = new  UserService(new MemoryUserDAO());
+
+        // myObject.registerUser()
     }
 
     @Test

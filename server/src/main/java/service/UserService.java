@@ -16,6 +16,10 @@ public class UserService {
         return dataAccess.registerUser(user);
     }
 
+    public UserData login(UserData user) throws DataAccessException {
+        return dataAccess.login(user);
+    }
+
     public void clear(){
         this.dataAccess.clear();
     }

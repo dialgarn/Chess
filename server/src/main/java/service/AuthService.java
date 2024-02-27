@@ -1,6 +1,7 @@
 package service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 
@@ -13,5 +14,13 @@ public class AuthService {
 
     public AuthData createAuth(UserData user) {
         return this.dataAccess.createAuth(user);
+    }
+
+    public AuthData getAuth(UserData user) {
+        return this.dataAccess.getAuth(user.username());
+    }
+
+    public void deleteAuth(String authToken) throws DataAccessException {
+        this.dataAccess.deleteAuth(authToken);
     }
 }

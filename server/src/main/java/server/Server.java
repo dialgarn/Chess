@@ -29,6 +29,8 @@ public class Server {
 
         Spark.delete("/db", this::clear);
         Spark.post("/user", this::register);
+        Spark.post("/session", this::login);
+        Spark.delete("/session", this::logout);
         // get
         // post
         // put
@@ -38,10 +40,57 @@ public class Server {
         return Spark.port();
     }
 
+    private Object logout(Request request, Response response) {
+        try {
+            var authToken = request.headers("Authorization");
+            authService.deleteAuth(authToken);
+            response.status(200);
+            return "{}";
+        } catch (Throwable e) {
+            if (e.getMessage() != null) { // Check if the message is not null
+                String errorMessage = e.getMessage();
+                if (errorMessage.equals("Unauthorized")) {
+                    response.status(401);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                } else {
+                    response.status(500);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                }
+            } else {
+                response.status(500);
+                return "{\"message\": \"Error: Unknown\" }"; // Provide a default error message
+            }
+        }
+    }
+
+    private Object login(Request request, Response response) {
+        try {
+            var user = new Gson().fromJson(request.body(), UserData.class);
+            user = userService.login(user);
+            AuthData auth = authService.createAuth(user);
+            response.status(200);
+            return new Gson().toJson(auth);
+        } catch (Throwable e) {
+            if (e.getMessage() != null) { // Check if the message is not null
+                String errorMessage = e.getMessage();
+                if (errorMessage.equals("Unauthorized")) {
+                    response.status(401);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                } else {
+                    response.status(500);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                }
+            } else {
+                response.status(500);
+                return "{\"message\": \"Error: Unknown\" }"; // Provide a default error message
+            }
+        }
+    }
+
     private Object clear(Request request, Response response) {
         userService.clear();
         response.status(200);
-        return "";
+        return "{}";
     }
 
     /**
@@ -50,23 +99,32 @@ public class Server {
      * @param response .
      * @return authData (username and authToken
      */
-    private Object register(Request request, Response response) throws DataAccessException {
+    private Object register(Request request, Response response) {
         try {
             var user = new Gson().fromJson(request.body(), UserData.class);
             user = userService.registerUser(user);
             AuthData auth = authService.createAuth(user);
-            // webSocketHandler.makeNoise(pet.name(), pet.sound());
+            response.status(200);
             return new Gson().toJson(auth);
         } catch (Throwable e) {
-            if (e.getMessage().equals("Bad Request")) {
-                response.status(400);
+            if (e.getMessage() != null) { // Check if the message is not null
+                String errorMessage = e.getMessage();
+                if (errorMessage.equals("Bad Request")) {
+                    response.status(400);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                } else if (errorMessage.equals("Already Taken")) {
+                    response.status(403);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                } else {
+                    response.status(500);
+                    return String.format("{\"message\": \"Error: %s\" }", errorMessage);
+                }
+            } else {
+                response.status(500);
+                return "{\"message\": \"Error: Unknown\" }"; // Provide a default error message
             }
-            return response;
         }
     }
-
-//    private Object clear(Request request, Response response) {
-//    }
 
 
     public int port() {
