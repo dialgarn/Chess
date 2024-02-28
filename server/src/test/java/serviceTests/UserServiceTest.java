@@ -34,6 +34,28 @@ class UserServiceTest {
     }
 
     @Test
+    void loginSuccess() throws DataAccessException {
+        var myObject = new UserService(new MemoryUserDAO());
+        UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
+
+        myObject.registerUser(user1);
+
+
+        Assertions.assertEquals(user1, myObject.login(user1));
+    }
+
+    @Test
+    void loginFail() throws DataAccessException {
+        var myObject = new UserService(new MemoryUserDAO());
+        UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
+        UserData user2 = new UserData("user2", "password2", "user2@gmail.com");
+
+        myObject.registerUser(user1);
+
+        Assertions.assertThrows(DataAccessException.class, ()->myObject.login(user2));
+    }
+    
+    @Test
     void clear() throws DataAccessException {
         var myObject = new UserService(new MemoryUserDAO());
 
