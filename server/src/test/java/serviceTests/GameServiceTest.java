@@ -117,7 +117,7 @@ class GameServiceTest {
         String myOutput = new Gson().toJson(Map.of("games", new ArrayList<>(myObject.listGames())));
         Assertions.assertEquals(expectedOutput, myOutput);
     }
-    
+
     @Test
     void clear() {
         var gameDAO = new MemoryGameDAO();
