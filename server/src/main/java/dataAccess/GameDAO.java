@@ -12,4 +12,5 @@ public interface GameDAO {
 
     void clear();
 
+    int getSize();
 }
