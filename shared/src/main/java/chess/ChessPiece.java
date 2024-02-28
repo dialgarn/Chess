@@ -1,5 +1,9 @@
 package chess;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
 /**
  * Represents a single chess piece
  * <p>
@@ -9,39 +13,34 @@ import java.util.*;
 public class ChessPiece {
     private PieceType piece = null;
     private ChessGame.TeamColor color = null;
-    public void setPiece(PieceType piece) {
-        this.piece = piece;
-    }
-    public void setColor(ChessGame.TeamColor color) {
-        this.color = color;
-    }
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         setPiece(type);
         setColor(pieceColor);
     }
-    /**
-     * The various different chess piece options
-     */
-    public enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
+
+    public void setPiece(PieceType piece) {
+        this.piece = piece;
     }
+
+    public void setColor(ChessGame.TeamColor color) {
+        this.color = color;
+    }
+
     /**
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
         return color;
     }
+
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
         return piece;
     }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -59,13 +58,14 @@ public class ChessPiece {
             case PAWN -> pawnMove(board, myPosition);
         };
     }
-    private Collection<ChessMove> kingMove(ChessBoard board, ChessPosition position){
+
+    private Collection<ChessMove> kingMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
         // up
         row++;
-        if (row <= 8){
+        if (row <= 8) {
             singleCollisionCheck(board, position, moves, row, column);
         }
         // up and right
@@ -77,7 +77,7 @@ public class ChessPiece {
         }
         // right
         row--;
-        if (column <= 8){
+        if (column <= 8) {
             singleCollisionCheck(board, position, moves, row, column);
         }
         // down and right
@@ -113,7 +113,8 @@ public class ChessPiece {
         }
         return moves;
     }
-    private Collection<ChessMove> queenMove(ChessBoard board, ChessPosition position){
+
+    private Collection<ChessMove> queenMove(ChessBoard board, ChessPosition position) {
         // gets the diagonal move set by calling bishopMove
         HashSet<ChessMove> queenMoves = (HashSet<ChessMove>) bishopMove(board, position);
         // gets the straight move set by calling rookMove
@@ -122,7 +123,8 @@ public class ChessPiece {
         queenMoves.addAll(straightMoves);
         return queenMoves;
     }
-    private Collection<ChessMove> bishopMove(ChessBoard board, ChessPosition position){
+
+    private Collection<ChessMove> bishopMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
@@ -178,7 +180,7 @@ public class ChessPiece {
         return false;
     }
 
-    private Collection<ChessMove> knightMove(ChessBoard board, ChessPosition position){
+    private Collection<ChessMove> knightMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
@@ -186,13 +188,13 @@ public class ChessPiece {
         // up and right/left
         row += 2;
         if (row <= 8) {
-            column ++;
-            if (column <= 8){
+            column++;
+            if (column <= 8) {
                 singleCollisionCheck(board, position, moves, row, column);
             }
 
             column -= 2;
-            if (column >= 1){
+            if (column >= 1) {
                 singleCollisionCheck(board, position, moves, row, column);
             }
         }
@@ -202,7 +204,7 @@ public class ChessPiece {
         column = position.getColumn();
 
         column += 2;
-        if (column <= 8){
+        if (column <= 8) {
             row++;
             if (row <= 8) {
                 singleCollisionCheck(board, position, moves, row, column);
@@ -219,7 +221,7 @@ public class ChessPiece {
         column = position.getColumn();
 
         row -= 2;
-        if (row >= 1){
+        if (row >= 1) {
             column++;
             if (column <= 8) {
                 singleCollisionCheck(board, position, moves, row, column);
@@ -236,7 +238,7 @@ public class ChessPiece {
         column = position.getColumn();
 
         column -= 2;
-        if (column >= 1){
+        if (column >= 1) {
             row++;
             if (row <= 8) {
                 singleCollisionCheck(board, position, moves, row, column);
@@ -250,6 +252,7 @@ public class ChessPiece {
 
         return moves;
     }
+
     private void singleCollisionCheck(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
         ChessPosition end = new ChessPosition(row, column);
 
@@ -261,7 +264,8 @@ public class ChessPiece {
             moves.add(pieceMove);
         }
     }
-    private Collection<ChessMove> rookMove(ChessBoard board, ChessPosition position){
+
+    private Collection<ChessMove> rookMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
@@ -293,7 +297,8 @@ public class ChessPiece {
         }
         return moves;
     }
-    private Collection<ChessMove> pawnMove(ChessBoard board, ChessPosition position){
+
+    private Collection<ChessMove> pawnMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = (HashSet<ChessMove>) pawnWhiteMove(board, position);
 
         HashSet<ChessMove> pawnBlackMoves = (HashSet<ChessMove>) pawnBlackMove(board, position);
@@ -302,15 +307,16 @@ public class ChessPiece {
 
         return moves;
     }
+
     private Collection<ChessMove> pawnWhiteMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
         int row = position.getRow();
         int column = position.getColumn();
         boolean canMove;
-        if (color == ChessGame.TeamColor.WHITE){
+        if (color == ChessGame.TeamColor.WHITE) {
             row++;
             // check for promotion
-            if (row == 8){
+            if (row == 8) {
                 ChessPosition end = new ChessPosition(row, column);
                 pawnPromotion(position, moves, end);
             } else { // normal move
@@ -364,7 +370,7 @@ public class ChessPiece {
         if (color == ChessGame.TeamColor.BLACK) {
             row--;
             // check for promotion
-            if (row == 1){
+            if (row == 1) {
                 ChessPosition end = new ChessPosition(row, column);
                 pawnPromotion(position, moves, end);
             } else { // normal move
@@ -394,7 +400,6 @@ public class ChessPiece {
         return moves;
     }
 
-
     private void pawnPromotion(ChessPosition position, HashSet<ChessMove> moves, ChessPosition end) {
         ChessMove pieceMove = new ChessMove(position, end, PieceType.QUEEN);
         moves.add(pieceMove);
@@ -408,6 +413,7 @@ public class ChessPiece {
         pieceMove = new ChessMove(position, end, PieceType.KNIGHT);
         moves.add(pieceMove);
     }
+
     private boolean pawnAdvanceCheck(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
         ChessPosition end = new ChessPosition(row, column);
         if (board.getPiece(end) == null) {
@@ -417,6 +423,7 @@ public class ChessPiece {
         }
         return false;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -424,15 +431,29 @@ public class ChessPiece {
         ChessPiece that = (ChessPiece) o;
         return piece == that.piece && color == that.color;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(piece, color);
     }
+
     @Override
     public String toString() {
         return "ChessPiece{" +
                 "piece=" + piece +
                 ", color=" + color +
                 '}';
+    }
+
+    /**
+     * The various different chess piece options
+     */
+    public enum PieceType {
+        KING,
+        QUEEN,
+        BISHOP,
+        KNIGHT,
+        ROOK,
+        PAWN
     }
 }
