@@ -327,20 +327,20 @@ public class ChessPiece {
             column++;
             if (column <= 8) {
                 // pawn attack promotion
-                pawnAttackPromotionWhite(board, position, moves, row, column);
+                pawnAttackPromotion(board, position, moves, row, column, 8);
             }
             column -= 2;
             if (column >= 1) {
                 // pawn attack promotion
-                pawnAttackPromotionWhite(board, position, moves, row, column);
+                pawnAttackPromotion(board, position, moves, row, column, 8);
             }
         }
         return moves;
     }
 
-    private void pawnAttackPromotionWhite(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
+    private void pawnAttackPromotion(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column, int rowValue) {
         ChessPosition end = new ChessPosition(row, column);
-        if (row == 8) {
+        if (row == rowValue) {
             if (board.getPiece(end) != null) {
                 if (color != board.getPiece(end).color) {
                     pawnPromotion(position, moves, end);
@@ -383,34 +383,17 @@ public class ChessPiece {
             column++;
             if (column <= 8) {
                 // pawn attack promotion
-                pawnAttackPromotionBlack(board, position, moves, row, column);
+                pawnAttackPromotion(board, position, moves, row, column, 1);
             }
             column -= 2;
             if (column >= 1) {
                 // pawn attack promotion
-                pawnAttackPromotionBlack(board, position, moves, row, column);
+                pawnAttackPromotion(board, position, moves, row, column, 1);
             }
         }
         return moves;
     }
 
-    private void pawnAttackPromotionBlack(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
-        ChessPosition end = new ChessPosition(row, column);
-        if (row == 1) {
-            if (board.getPiece(end) != null) {
-                if (color != board.getPiece(end).color) {
-                    pawnPromotion(position, moves, end);
-                }
-            }
-        } else {
-            if (board.getPiece(end) != null) {
-                if (color != board.getPiece(end).color) {
-                    ChessMove pieceMove = new ChessMove(position, end, null);
-                    moves.add(pieceMove);
-                }
-            }
-        }
-    }
 
     private void pawnPromotion(ChessPosition position, HashSet<ChessMove> moves, ChessPosition end) {
         ChessMove pieceMove = new ChessMove(position, end, PieceType.QUEEN);
