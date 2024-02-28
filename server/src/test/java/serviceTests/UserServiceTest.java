@@ -11,14 +11,15 @@ class UserServiceTest {
 
     @Test
     void registerUser() throws DataAccessException {
-        var myObject = new  UserService(new MemoryUserDAO());
+        var userDAO = new MemoryUserDAO();
+        var myObject = new UserService(userDAO);
         UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
         UserData user2 = new UserData("user2", "password2", "user2@gmail.com");
 
         myObject.registerUser(user1);
         myObject.registerUser(user2);
 
-        int size = myObject.getSize();
+        int size = userDAO.getSize();
 
         Assertions.assertEquals(2, size);
     }
@@ -54,15 +55,16 @@ class UserServiceTest {
 
         Assertions.assertThrows(DataAccessException.class, ()->myObject.login(user2));
     }
-    
+
     @Test
     void clear() throws DataAccessException {
-        var myObject = new UserService(new MemoryUserDAO());
+        var userDAO = new MemoryUserDAO();
+        var myObject = new UserService(userDAO);
 
         myObject.registerUser(new UserData("testUser", "123", "test@test.com"));
         myObject.clear();
 
-        int size = myObject.getSize();
+        int size = userDAO.getSize();
         int expectedSize = 0;
 
         Assertions.assertEquals(expectedSize, size);

@@ -24,7 +24,4 @@ public class UserService {
         this.dataAccess.clear();
     }
 
-    public int getSize(){
-        return this.dataAccess.getSize();
-    }
 }

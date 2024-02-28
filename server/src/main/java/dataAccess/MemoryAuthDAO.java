@@ -17,14 +17,6 @@ public class MemoryAuthDAO implements AuthDAO {
         return authData;
     }
 
-    public AuthData getAuth(String username) {
-        for (AuthData auth : authList){
-            if (Objects.equals(auth.username(), username)) {
-                return auth;
-            }
-        }
-        return null;
-    }
 
     public void deleteAuth(String authToken) throws DataAccessException {
         for (AuthData auth : authList) {
@@ -47,5 +39,13 @@ public class MemoryAuthDAO implements AuthDAO {
 
     public void clear() {
         authList.clear();
+    }
+
+    public int getSize() {
+        return authList.size();
+    }
+
+    public boolean contains(AuthData auth) {
+        return authList.contains(auth);
     }
 }

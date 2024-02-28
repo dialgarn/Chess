@@ -16,10 +16,6 @@ public class AuthService {
         return this.dataAccess.createAuth(user);
     }
 
-    public AuthData getAuth(UserData user) {
-        return this.dataAccess.getAuth(user.username());
-    }
-
     public void deleteAuth(String authToken) throws DataAccessException {
         this.dataAccess.deleteAuth(authToken);
     }
