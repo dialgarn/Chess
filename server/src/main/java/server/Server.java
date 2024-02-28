@@ -54,13 +54,6 @@ public class Server {
             HashSet<GameData> games = (HashSet<GameData>) gameService.listGames();
 
             response.status(200);
-            String output = "{\"games\": [";
-            for (GameData game : games) {
-                output += String.format("{\"gameID\": %d, \"whiteUsername\":%s, \"blackUsername\":%s, \"gameName\":%s} "
-                        , game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName());
-
-            }
-            output += "]}";
             return new Gson().toJson(Map.of("games", new ArrayList<>(games)));
         } catch (Throwable e) {
             return errorHandling(request, response, e);

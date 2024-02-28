@@ -11,4 +11,5 @@ public interface GameDAO {
     Collection<GameData> listGames();
 
     void clear();
+    int getSize();
 }
