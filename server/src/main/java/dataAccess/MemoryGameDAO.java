@@ -23,7 +23,7 @@ public class MemoryGameDAO implements GameDAO {
                     if (game.whiteUsername() != null) {
                         throw new DataAccessException("Already Taken");
                     }
-                    GameData newGame = new GameData(gameID, playerName, null, game.gameName(), game.game());
+                    GameData newGame = new GameData(gameID, playerName, game.blackUsername(), game.gameName(), game.game());
                     gameList.remove(game);
                     gameList.add(newGame);
                     return;
@@ -31,7 +31,7 @@ public class MemoryGameDAO implements GameDAO {
                     if (game.blackUsername() != null) {
                         throw new DataAccessException("Already Taken");
                     }
-                    GameData newGame = new GameData(gameID, null, playerName, game.gameName(), game.game());
+                    GameData newGame = new GameData(gameID, game.whiteUsername(), playerName, game.gameName(), game.game());
                     gameList.remove(game);
                     gameList.add(newGame);
                     return;

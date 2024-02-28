@@ -17,7 +17,9 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 public class Server {
 
@@ -59,7 +61,7 @@ public class Server {
 
             }
             output += "]}";
-            return output;
+            return new Gson().toJson(Map.of("games", new ArrayList<>(games)));
         } catch (Throwable e) {
             return errorHandling(request, response, e);
         }
