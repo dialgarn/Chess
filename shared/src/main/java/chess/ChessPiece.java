@@ -182,75 +182,82 @@ public class ChessPiece {
 
     private Collection<ChessMove> knightMove(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
+        knightMove1(board, position, moves);
+
+        knightMove2(board, position, moves);
+
+        // down and right/left
+        knightMove3(board, position, moves);
+
+        // left and up/down
+        int row = position.getRow();
+        int column = position.getColumn();
+        knightMove4(board, position, moves, row, column);
+
+        return moves;
+    }
+
+    private void knightMove4(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
+        column -= 2;
+        if (column >= 1) {
+            knightRowHelp(board, position, moves, row, column);
+        }
+    }
+
+    private void knightRowHelp(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
+        row++;
+        if (row <= 8) {
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+
+        row -= 2;
+        if (row >= 1) {
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+    }
+
+    private void knightMove3(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves) {
+        int column = position.getColumn();
+        int row = position.getRow();
+
+        row -= 2;
+        if (row >= 1) {
+            knightColumnHelp(board, position, moves, column, row);
+        }
+    }
+
+    private void knightColumnHelp(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int column, int row) {
+        column++;
+        if (column <= 8) {
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+
+        column -= 2;
+        if (column >= 1) {
+            singleCollisionCheck(board, position, moves, row, column);
+        }
+    }
+
+    private void knightMove2(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves) {
+        int row = position.getRow();
+        int column = position.getColumn();
+        // right and up/down
+
+        column += 2;
+        if (column <= 8) {
+            knightRowHelp(board, position, moves, row, column);
+        }
+    }
+
+    private void knightMove1(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves) {
         int row = position.getRow();
         int column = position.getColumn();
 
         // up and right/left
         row += 2;
         if (row <= 8) {
-            column++;
-            if (column <= 8) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-
-            column -= 2;
-            if (column >= 1) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
+            knightColumnHelp(board, position, moves, column, row);
         }
-
-        // right and up/down
-        row = position.getRow();
-        column = position.getColumn();
-
-        column += 2;
-        if (column <= 8) {
-            row++;
-            if (row <= 8) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-
-            row -= 2;
-            if (row >= 1) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-        }
-
-        // down and right/left
-        row = position.getRow();
-        column = position.getColumn();
-
-        row -= 2;
-        if (row >= 1) {
-            column++;
-            if (column <= 8) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-
-            column -= 2;
-            if (column >= 1) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-        }
-
-        // left and up/down
-        row = position.getRow();
-        column = position.getColumn();
-
-        column -= 2;
-        if (column >= 1) {
-            row++;
-            if (row <= 8) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-
-            row -= 2;
-            if (row >= 1) {
-                singleCollisionCheck(board, position, moves, row, column);
-            }
-        }
-
-        return moves;
     }
 
     private void singleCollisionCheck(ChessBoard board, ChessPosition position, HashSet<ChessMove> moves, int row, int column) {
