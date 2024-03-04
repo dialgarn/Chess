@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 
 import dataAccess.DataAccessException;
 
+import dataAccess.DatabaseManager;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
