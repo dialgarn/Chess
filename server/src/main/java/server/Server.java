@@ -4,12 +4,8 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import dataAccess.DataAccessException;
+import dataAccess.*;
 
-import dataAccess.DatabaseManager;
-import dataAccess.MemoryAuthDAO;
-import dataAccess.MemoryGameDAO;
-import dataAccess.MemoryUserDAO;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -18,15 +14,16 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 
 public class Server {
 
-    private final UserService userService = new UserService(new MemoryUserDAO());
-    private final AuthService authService = new AuthService(new MemoryAuthDAO());
-    private final GameService gameService = new GameService(new MemoryGameDAO());
+    private final UserService userService = new UserService(new DatabaseUserDAO());
+    private final AuthService authService = new AuthService(new DatabaseAuthDAO());
+    private final GameService gameService = new GameService(new DatabaseGameDAO());
 
     public Server() {}
 
@@ -34,6 +31,13 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        try {
+            DatabaseManager.createDatabase();
+            DatabaseManager.setupDatabase();
+        } catch (DataAccessException | SQLException e) {
+            return 500;
+        }
 
         Spark.delete("/db", this::clear);
         Spark.post("/user", this::register);
@@ -119,10 +123,10 @@ public class Server {
         }
     }
 
-    private Object clear(Request request, Response response) {
-        userService.clear();
+    private Object clear(Request request, Response response) throws DataAccessException {
         gameService.clear();
         authService.clear();
+        userService.clear();
         response.status(200);
         return "{}";
     }

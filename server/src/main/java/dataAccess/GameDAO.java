@@ -10,7 +10,7 @@ public interface GameDAO {
     void joinGame(int gameID, ChessGame.TeamColor playerColor, String playerName) throws DataAccessException;
     Collection<GameData> listGames();
 
-    void clear();
+    void clear() throws DataAccessException;
 
     int getSize();
 }

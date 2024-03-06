@@ -34,7 +34,7 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    public static void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
@@ -65,6 +65,61 @@ public class DatabaseManager {
             return conn;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public static void setupDatabase() throws DataAccessException, SQLException {
+        try (Connection c = getConnection()) {
+            createUsersTable(c);
+            createAuthTable(c);
+            createGamesTable(c);
+        } catch (SQLException e) {
+            throw new DataAccessException("Error setting up the database: " + e.getMessage());
+        }
+    }
+
+    private static void createUsersTable(Connection connection) throws SQLException {
+        String userTable = "CREATE TABLE IF NOT EXISTS users(" +
+                "user_id integer not null primary key auto_increment," +
+                "username VARCHAR(255) not null unique," +
+                "password VARCHAR(255) not null," +
+                "email VARCHAR(255) not null);";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(userTable);
+        } catch (SQLException e) {
+            throw new SQLException("Error creating the users table: " + e.getMessage(), e);
+        }
+    }
+
+    private static void createAuthTable(Connection connection) throws SQLException {
+        String authTable = "CREATE TABLE IF NOT EXISTS auth(" +
+                "auth_id integer not null primary key auto_increment," +
+                "user_id integer not null," +
+                "auth VARCHAR(255) not null," +
+                "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE);";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(authTable);
+        } catch (SQLException e) {
+            throw new SQLException("Error creating the auth table: " + e.getMessage(), e);
+        }
+    }
+
+    private static void createGamesTable(Connection connection) throws SQLException {
+        String gamesTable = "CREATE TABLE IF NOT EXISTS games(" +
+                "game_id integer not null primary key auto_increment," +
+                "white_user_id integer," +
+                "black_user_id integer," +
+                "game_name VARCHAR(255) not null," +
+                "game_data TEXT," +
+                "FOREIGN KEY (white_user_id) REFERENCES users(user_id)," +
+                "FOREIGN KEY (black_user_id) REFERENCES users(user_id));";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(gamesTable);
+        } catch (SQLException e) {
+            throw new SQLException("Error creating the games table: " + e.getMessage(), e);
         }
     }
 }

@@ -10,9 +10,9 @@ import java.util.UUID;
 public class MemoryAuthDAO implements AuthDAO {
     private final HashSet<AuthData> authList = new HashSet<>();
 
-    public AuthData createAuth(UserData username){
+    public AuthData createAuth(UserData user){
         String authToken = UUID.randomUUID().toString();
-        AuthData authData = new AuthData(authToken, username.username());
+        AuthData authData = new AuthData(authToken, user.username());
         authList.add(authData);
         return authData;
     }

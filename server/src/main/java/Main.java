@@ -1,5 +1,6 @@
 import chess.ChessGame;
 import chess.ChessPiece;
+import dataAccess.DataAccessException;
 import server.Server;
 
 public class Main {

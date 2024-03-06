@@ -4,14 +4,14 @@ import model.AuthData;
 import model.UserData;
 
 public interface AuthDAO {
-    AuthData createAuth(UserData user);
+    AuthData createAuth(UserData user) throws DataAccessException;
 
 
     void deleteAuth(String authToken) throws DataAccessException;
 
     AuthData verify(String authToken) throws DataAccessException;
 
-    void clear();
+    void clear() throws DataAccessException;
 
     int getSize();
 

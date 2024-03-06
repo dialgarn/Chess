@@ -2,7 +2,11 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
+import dataAccess.DatabaseManager;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
 public class DatabaseGameDAO implements GameDAO {
@@ -22,8 +26,19 @@ public class DatabaseGameDAO implements GameDAO {
     }
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        try (Connection c = DatabaseManager.getConnection()) {
+            String deleteAll = "DELETE FROM games";
+            try (Statement stmt = c.createStatement()) {
+                stmt.executeUpdate(deleteAll);
+            }
+            String resetAutoIncrement = "ALTER TABLE games AUTO_INCREMENT = 1";
+            try (Statement stmt = c.createStatement()) {
+                stmt.executeUpdate(resetAutoIncrement);
+            }
+        } catch (DataAccessException | SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override

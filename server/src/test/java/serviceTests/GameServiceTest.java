@@ -35,7 +35,7 @@ class GameServiceTest {
     }
 
     @Test
-    void createGameFailure() {
+    void createGameFailure() throws DataAccessException {
         var gameDAO = new MemoryGameDAO();
         var myObject = new GameService(gameDAO);
 
@@ -119,7 +119,7 @@ class GameServiceTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         var gameDAO = new MemoryGameDAO();
         var myObject = new GameService(gameDAO);
 

@@ -12,7 +12,7 @@ public class AuthService {
         this.dataAccess = dataAccess;
     }
 
-    public AuthData createAuth(UserData user) {
+    public AuthData createAuth(UserData user) throws DataAccessException {
         return this.dataAccess.createAuth(user);
     }
 
@@ -24,7 +24,7 @@ public class AuthService {
         return this.dataAccess.verify(authToken);
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         this.dataAccess.clear();
     }
 }

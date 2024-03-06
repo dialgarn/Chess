@@ -20,7 +20,7 @@ public class UserService {
         return dataAccess.login(user);
     }
 
-    public void clear(){
+    public void clear() throws DataAccessException {
         this.dataAccess.clear();
     }
 

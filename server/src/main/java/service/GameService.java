@@ -28,7 +28,7 @@ public class GameService {
         return this.dataAccess.listGames();
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         this.dataAccess.clear();
     }
 }

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AuthServiceTest {
 
     @Test
-    void createAuthSuccess() {
+    void createAuthSuccess() throws DataAccessException {
         var authDAO = new MemoryAuthDAO();
         var myObject = new AuthService(authDAO);
         UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
@@ -27,7 +27,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void createAuthFail() {
+    void createAuthFail() throws DataAccessException {
         var myObject = new AuthService(new MemoryAuthDAO());
         UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
 
@@ -50,7 +50,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void deleteAuthFailure() {
+    void deleteAuthFailure() throws DataAccessException {
         var authDAO = new MemoryAuthDAO();
         var myObject = new AuthService(authDAO);
         UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
@@ -74,7 +74,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void verifyFailure() {
+    void verifyFailure() throws DataAccessException {
         var authDAO = new MemoryAuthDAO();
         var myObject = new AuthService(authDAO);
         UserData user1 = new UserData("user1", "password1", "user1@gmail.com");
@@ -86,7 +86,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         var authDAO = new MemoryAuthDAO();
         var myObject = new AuthService(authDAO);
 
