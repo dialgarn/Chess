@@ -12,5 +12,4 @@ public interface GameDAO {
 
     void clear() throws DataAccessException;
 
-    int getSize();
 }

@@ -151,9 +151,4 @@ public class DatabaseGameDAO implements GameDAO {
             throw new DataAccessException(e.getMessage());
         }
     }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
 }

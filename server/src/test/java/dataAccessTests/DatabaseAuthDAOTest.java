@@ -4,6 +4,7 @@ import dataAccess.DataAccessException;
 import dataAccess.DatabaseAuthDAO;
 import dataAccess.DatabaseGameDAO;
 import dataAccess.DatabaseUserDAO;
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 
@@ -37,15 +38,67 @@ class DatabaseAuthDAOTest {
     }
 
     @Test
-    void createAuth() {
+    void createAuthSuccess() throws DataAccessException {
+        UserData newUser = new UserData("newUser", "test", "test@gmail.com");
+
+        userDao.registerUser(newUser);
+
+        Assertions.assertDoesNotThrow(()->authDao.createAuth(newUser));
     }
 
     @Test
-    void deleteAuth() {
+    void createAuthFailure() throws DataAccessException {
+        UserData newUser = new UserData("newUser", "test", "test@gmail.com");
+
+        userDao.registerUser(newUser);
+
+        UserData notRegisteredUser = new UserData("noob", "kekw", "yuh@yahoo.com");
+
+        Assertions.assertThrows(DataAccessException.class, ()->authDao.createAuth(notRegisteredUser));
     }
 
     @Test
-    void verify() {
+    void deleteAuthSuccess() throws DataAccessException {
+        UserData newUser = new UserData("newUser", "test", "test@gmail.com");
+
+        userDao.registerUser(newUser);
+
+        AuthData auth = authDao.createAuth(newUser);
+
+        Assertions.assertDoesNotThrow(()->authDao.deleteAuth(auth.authToken()));
+    }
+
+    @Test
+    void deleteAuthFailure() throws DataAccessException {
+        UserData newUser = new UserData("newUser", "test", "test@gmail.com");
+
+        userDao.registerUser(newUser);
+
+        AuthData fakeAuth = new AuthData("i am a sneaky man", "newUser");
+
+        Assertions.assertThrows(DataAccessException.class, ()->authDao.deleteAuth(fakeAuth.authToken()));
+    }
+
+    @Test
+    void verifySuccess() throws DataAccessException {
+        UserData newUser = new UserData("newUser", "test", "test@gmail.com");
+
+        userDao.registerUser(newUser);
+
+        AuthData auth = authDao.createAuth(newUser);
+
+        Assertions.assertDoesNotThrow(()->authDao.verify(auth.authToken()));
+    }
+
+    @Test
+    void verifyFailure() throws DataAccessException {
+        UserData newUser = new UserData("newUser", "test", "test@gmail.com");
+
+        userDao.registerUser(newUser);
+
+        AuthData fakeAuth = new AuthData("i am a sneaky man", "newUser");
+
+        Assertions.assertThrows(DataAccessException.class, ()->authDao.verify(fakeAuth.authToken()));
     }
 
     @Test
