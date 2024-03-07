@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameServiceTest {
 
     @Test
-    void createGameSuccess() {
+    void createGameSuccess() throws DataAccessException {
         var gameDAO = new MemoryGameDAO();
         var myObject = new GameService(gameDAO);
 

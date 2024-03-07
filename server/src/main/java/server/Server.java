@@ -56,10 +56,10 @@ public class Server {
             var authToken = request.headers("Authorization");
             authService.verify(authToken);
 
-            HashSet<GameData> games = (HashSet<GameData>) gameService.listGames();
+            ArrayList<GameData> games = (ArrayList<GameData>) gameService.listGames();
 
             response.status(200);
-            return new Gson().toJson(Map.of("games", new ArrayList<>(games)));
+            return new Gson().toJson(Map.of("games", games));
         } catch (Throwable e) {
             return errorHandling(request, response, e);
         }

@@ -16,7 +16,7 @@ public class GameService {
         this.dataAccess = dataAccess;
     }
 
-    public int createGame(String gameName) {
+    public int createGame(String gameName) throws DataAccessException {
         return this.dataAccess.createGame(gameName);
     }
 
@@ -24,7 +24,7 @@ public class GameService {
         this.dataAccess.joinGame(gameID, playerColor, playerName);
     }
 
-    public Collection<GameData> listGames() {
+    public Collection<GameData> listGames() throws DataAccessException {
         return this.dataAccess.listGames();
     }
 
