@@ -2,7 +2,6 @@ package dataAccess;
 
 import model.AuthData;
 import model.UserData;
-import dataAccess.DatabaseManager;
 
 import java.sql.*;
 import java.util.UUID;

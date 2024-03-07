@@ -3,20 +3,19 @@ package server;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import dataAccess.*;
-
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
-import spark.*;
+import spark.Request;
+import spark.Response;
+import spark.Spark;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 
 public class Server {
