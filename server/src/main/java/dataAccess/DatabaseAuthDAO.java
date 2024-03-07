@@ -94,14 +94,4 @@ public class DatabaseAuthDAO implements AuthDAO {
             throw new DataAccessException(e.getMessage());
         }
     }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public boolean contains(AuthData auth) {
-        return false;
-    }
 }

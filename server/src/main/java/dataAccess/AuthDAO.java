@@ -13,8 +13,5 @@ public interface AuthDAO {
 
     void clear() throws DataAccessException;
 
-    int getSize();
-
-    boolean contains(AuthData auth);
 }
 
