@@ -63,8 +63,7 @@ public class UserRequests {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                responseValue = response.statusCode();
+            if (responseValue == 200) {
                 System.out.println("Successfully logged out.");
             } else {
                 throw new DataAccessException(response.body());

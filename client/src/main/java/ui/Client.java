@@ -1,7 +1,9 @@
 package ui;
 
+import model.GameData;
 import server.Server;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Client {
@@ -87,7 +89,27 @@ public class Client {
                             }
                         }
                         break;
-
+                    case "list":
+                        String url = "http://localhost:" + server.port() + "/game";
+                        try {
+                            ArrayList<GameData> games = (ArrayList<GameData>) gameRequests.listGames(authToken, url);
+                            for (var game : games) {
+                                System.out.println(game);
+                            }
+                        } catch (Throwable e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "join":
+                        url = "http://localhost:" + server.port() + "/game";
+                        int gameID = Integer.parseInt(tokens[1]);
+                        String teamColor = tokens[2];
+                        try {
+                            gameRequests.joinGame(authToken, gameID, teamColor, url);
+                        } catch (Throwable e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
                     case "quit":
                         if (logged_in) {
                             logout();
