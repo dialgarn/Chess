@@ -1,25 +1,16 @@
 package ui;
 
-import com.google.gson.Gson;
-
-import com.google.gson.JsonObject;
-import dataAccess.DataAccessException;
 import server.Server;
 
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
     private boolean logged_in = false;
-    String authToken;
-    int responseValue;
+    String authToken = "";
     private final Server server;
+    private final UserRequests userRequests = new UserRequests();
+
+    private final GameRequests gameRequests = new GameRequests();
 
 
     public Client() {
@@ -53,25 +44,54 @@ public class Client {
                         if (tokens.length != 3) {
                             System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD>");
                         } else {
+                            String url = "http://localhost:" + server.port() + "/session";
                             String username = tokens[1];
                             String password = tokens[2];
-                            login(username, password);
+                            try {
+                                authToken = userRequests.login(username, password, url);
+                                logged_in = true;
+                            } catch (Throwable e) {
+                                System.out.println(e.getMessage());
+                            }
                         }
                         break;
                     case "register":
                         if (tokens.length != 4) {
                             System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>");
                         } else {
+                            String url = "http://localhost:" + server.port() + "/user";
                             String username = tokens[1];
                             String password = tokens[2];
                             String email = tokens[3];
-                            register(username, password, email);
+                            try {
+                                authToken = userRequests.register(username, password, email, url);
+                                logged_in = true;
+                            } catch (Throwable e) {
+                                System.out.println(e.getMessage());
+                            }
                         }
                         break;
                     case "logout":
                         logout();
                         break;
+                    case "create":
+                        if (tokens.length != 2) {
+                            System.out.println("Invalid number of arguments. Usage: create <NAME>");
+                        } else {
+                            String url = "http://localhost:" + server.port() + "/game";
+                            String gameName = tokens[1];
+                            try {
+                                gameRequests.createGame(gameName, authToken, url);
+                            } catch (Throwable e) {
+                                System.out.println(e.getMessage());
+                            }
+                        }
+                        break;
+
                     case "quit":
+                        if (logged_in) {
+                            logout();
+                        }
                         break label;
                 }
             }
@@ -99,84 +119,15 @@ public class Client {
         }
     }
 
-    private void register(String username, String password, String email) {
-        String url = "http://localhost:" + server.port() + "/user";
-        String requestBody = new Gson().toJson(Map.of(
-                "username", username,
-                "password", password,
-                "email", email
-        ));
-
-        try {
-            authToken = makeHttpUserPostRequest(requestBody, url);
-            logged_in = true;
-            System.out.println("Successfully registered and logged in.");
-        } catch (Throwable e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private void login(String username, String password) {
-        String url = "http://localhost:" + server.port() + "/session";
-        String requestBody = new Gson().toJson(Map.of(
-                "username", username,
-                "password", password
-        ));
-
-        try {
-            authToken = makeHttpUserPostRequest(requestBody, url);
-            if (responseValue == 200) {
-                logged_in = true;
-                System.out.println("Successfully logged in.");
-            }
-        } catch (Throwable e) {
-            System.out.println(e.getMessage());
-        }
-
-    }
-
     private void logout() {
         String url = "http://localhost:" + server.port() + "/session";
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", authToken)
-                .DELETE()
-                .build();
-
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                responseValue = response.statusCode();
-                logged_in = false;
-                System.out.println("Successfully logged out.");
-            } else {
-                throw new DataAccessException(response.body());
-            }
+            userRequests.logout(url);
+            logged_in = false;
+            authToken = "";
         } catch (Throwable e) {
             System.out.println(e.getMessage());
         }
     }
-    private String makeHttpUserPostRequest(String requestBody, String url) throws Exception {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
 
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            JsonObject responseBodyJson = new Gson().fromJson(response.body(), JsonObject.class);
-            if (response.statusCode() == 200) {
-                responseValue = response.statusCode();
-                return responseBodyJson.get("authToken").getAsString();
-
-            } else {
-                throw new DataAccessException(response.body());
-            }
-        } catch (Throwable e) {
-            throw new Exception(e.getMessage());
-        }
-    }
 }
