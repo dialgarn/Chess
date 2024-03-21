@@ -106,6 +106,7 @@ public class Client {
                     case "join":
                         int gameID = Integer.parseInt(tokens[1]);
                         String teamColor = tokens[2];
+                        teamColor = teamColor.toUpperCase();
                         try {
                             gameRequests.joinGame(authToken, gameID, teamColor, gameUrl);
                         } catch (Throwable e) {

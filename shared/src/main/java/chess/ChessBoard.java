@@ -143,7 +143,7 @@ public class ChessBoard implements Cloneable {
         // Print the board with white at the bottom
         for (int i = 7; i >= 0; i--) {
             // Add row label
-            output.append(i + 1).append(" |");
+            output.append(8 - i).append(" |");
 
             for (int j = 0; j < 8; j++) {
                 ChessPosition pieceLocation = new ChessPosition(i + 1, j + 1);
@@ -152,7 +152,7 @@ public class ChessBoard implements Cloneable {
             }
 
             // Add row label again at the end of the row
-            output.append(" ").append(i + 1).append("\n");
+            output.append(" ").append(8 - i).append("\n");
         }
 
         // Add bottom border
