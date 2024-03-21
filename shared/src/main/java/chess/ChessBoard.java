@@ -22,7 +22,6 @@ public class ChessBoard implements Cloneable {
 
     public ChessBoard() {
         this.board = new ChessPiece[8][8];
-        resetBoard();
         whitePieceCharacters.put(ChessPiece.PieceType.KING, EscapeSequences.WHITE_KING);
         whitePieceCharacters.put(ChessPiece.PieceType.QUEEN, EscapeSequences.WHITE_QUEEN);
         whitePieceCharacters.put(ChessPiece.PieceType.BISHOP, EscapeSequences.WHITE_BISHOP);

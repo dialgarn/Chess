@@ -2,12 +2,7 @@ package clientTests;
 
 import dataAccess.DataAccessException;
 import org.junit.jupiter.api.*;
-import server.Server;
-import spark.Spark;
 import ui.Client;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 
 public class ServerFacadeTests {
@@ -22,18 +17,28 @@ public class ServerFacadeTests {
         client = new Client();
         client.clear();
 
-        String url = "http://localhost:" + client.server.port() + "/user";
-        client.userRequests.register("test",
-                "test", "test@email.com", url);
+
         userUrl = "http://localhost:" + client.server.port() + "/user";
         loginUrl = "http://localhost:" + client.server.port() + "/session";
         gameUrl = "http://localhost:" + client.server.port() + "/game";
+
+    }
+    @BeforeEach
+    public void setup() throws DataAccessException {
+        client.userRequests.register("test",
+                "test", "test@email.com", userUrl);
         client.logout();
+    }
+
+    @AfterEach
+    public void resetDatabase() throws DataAccessException {
+        client.clear();
     }
 
     @AfterAll
     static void stopServer() throws DataAccessException {
         client.clear();
+        client.server.stop();
     }
 
 
@@ -106,7 +111,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listFailure() throws DataAccessException {
-        String authToken = client.userRequests.login("test", "test", loginUrl);
+        client.userRequests.login("test", "test", loginUrl);
         Assertions.assertThrows(DataAccessException.class, ()->client.gameRequests.getGames("badAuth", gameUrl));
     }
 

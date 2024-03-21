@@ -13,7 +13,10 @@ public class DatabaseGameDAO implements GameDAO {
     public int createGame(String gameName) throws DataAccessException {
         try (Connection c = DatabaseManager.getConnection()) {
             String createNewGame = "INSERT INTO games(game_name, game_data) VALUES(?, ?)";
-            var gameData = new Gson().toJson(new ChessGame());
+            // var gameData = new Gson().toJson(new ChessGame());
+            var game = new ChessGame();
+            game.getBoard().resetBoard();
+            var gameData = new Gson().toJson(game);
             try (PreparedStatement stmt = c.prepareStatement(createNewGame)) {
                 stmt.setString(1, gameName);
                 stmt.setString(2, gameData);
