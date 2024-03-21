@@ -53,17 +53,17 @@ public class UserRequests {
         return null;
     }
 
-    public void logout(String url) throws DataAccessException {
+    public void logout(String auth, String url) throws DataAccessException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("Authorization", authToken)
+                .header("Authorization", auth)
                 .DELETE()
                 .build();
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (responseValue == 200) {
+            if (response.statusCode() == 200) {
                 System.out.println("Successfully logged out.");
             } else {
                 throw new DataAccessException(response.body());

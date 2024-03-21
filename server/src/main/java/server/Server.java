@@ -7,7 +7,6 @@ import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.eclipse.jetty.websocket.server.WebSocketServerConnection;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -21,9 +20,9 @@ import java.util.Map;
 
 public class Server {
 
-    private final UserService userService = new UserService(new DatabaseUserDAO());
-    private final AuthService authService = new AuthService(new DatabaseAuthDAO());
-    private final GameService gameService = new GameService(new DatabaseGameDAO());
+    public final UserService userService = new UserService(new DatabaseUserDAO());
+    public final AuthService authService = new AuthService(new DatabaseAuthDAO());
+    public final GameService gameService = new GameService(new DatabaseGameDAO());
 
     public Server() {}
 
@@ -123,7 +122,7 @@ public class Server {
         }
     }
 
-    private Object clear(Request request, Response response) throws DataAccessException {
+    public Object clear(Request request, Response response) throws DataAccessException {
         gameService.clear();
         authService.clear();
         userService.clear();

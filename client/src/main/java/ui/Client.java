@@ -1,5 +1,6 @@
 package ui;
 
+import dataAccess.DataAccessException;
 import model.GameData;
 import server.Server;
 
@@ -9,19 +10,25 @@ import java.util.Scanner;
 public class Client {
     private boolean logged_in = false;
     String authToken = "";
-    private final Server server;
-    private final UserRequests userRequests = new UserRequests();
+    public final Server server;
+    public final UserRequests userRequests = new UserRequests();
 
-    private final GameRequests gameRequests = new GameRequests();
+    public final GameRequests gameRequests = new GameRequests();
+    private final String sessionUrl;
+    private final String userUrl;
+    private final String gameUrl;
 
 
     public Client() {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        sessionUrl = "http://localhost:" + server.port() + "/session";
+        userUrl = "http://localhost:" + server.port() + "/user";
+        gameUrl = "http://localhost:" + server.port() + "/game";
     }
 
-    public void run(String[] args) {
+    public void run() {
 
         Scanner scanner = new Scanner(System.in);
 
@@ -46,11 +53,10 @@ public class Client {
                         if (tokens.length != 3) {
                             System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD>");
                         } else {
-                            String url = "http://localhost:" + server.port() + "/session";
                             String username = tokens[1];
                             String password = tokens[2];
                             try {
-                                authToken = userRequests.login(username, password, url);
+                                authToken = userRequests.login(username, password, sessionUrl);
                                 logged_in = true;
                             } catch (Throwable e) {
                                 System.out.println(e.getMessage());
@@ -61,12 +67,11 @@ public class Client {
                         if (tokens.length != 4) {
                             System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>");
                         } else {
-                            String url = "http://localhost:" + server.port() + "/user";
                             String username = tokens[1];
                             String password = tokens[2];
                             String email = tokens[3];
                             try {
-                                authToken = userRequests.register(username, password, email, url);
+                                authToken = userRequests.register(username, password, email, userUrl);
                                 logged_in = true;
                             } catch (Throwable e) {
                                 System.out.println(e.getMessage());
@@ -80,19 +85,17 @@ public class Client {
                         if (tokens.length != 2) {
                             System.out.println("Invalid number of arguments. Usage: create <NAME>");
                         } else {
-                            String url = "http://localhost:" + server.port() + "/game";
                             String gameName = tokens[1];
                             try {
-                                gameRequests.createGame(gameName, authToken, url);
+                                gameRequests.createGame(gameName, authToken, gameUrl);
                             } catch (Throwable e) {
                                 System.out.println(e.getMessage());
                             }
                         }
                         break;
                     case "list":
-                        String url = "http://localhost:" + server.port() + "/game";
                         try {
-                            ArrayList<GameData> games = (ArrayList<GameData>) gameRequests.listGames(authToken, url);
+                            ArrayList<GameData> games = (ArrayList<GameData>) gameRequests.getGames(authToken, gameUrl);
                             for (var game : games) {
                                 System.out.println(game);
                             }
@@ -101,11 +104,18 @@ public class Client {
                         }
                         break;
                     case "join":
-                        url = "http://localhost:" + server.port() + "/game";
                         int gameID = Integer.parseInt(tokens[1]);
                         String teamColor = tokens[2];
                         try {
-                            gameRequests.joinGame(authToken, gameID, teamColor, url);
+                            gameRequests.joinGame(authToken, gameID, teamColor, gameUrl);
+                        } catch (Throwable e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "observe":
+                        gameID = Integer.parseInt(tokens[1]);
+                        try {
+                            gameRequests.joinGame(authToken, gameID, null, gameUrl);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
@@ -141,10 +151,9 @@ public class Client {
         }
     }
 
-    private void logout() {
-        String url = "http://localhost:" + server.port() + "/session";
+    public void logout() {
         try {
-            userRequests.logout(url);
+            userRequests.logout(authToken, sessionUrl);
             logged_in = false;
             authToken = "";
         } catch (Throwable e) {
@@ -152,4 +161,9 @@ public class Client {
         }
     }
 
+    public void clear() throws DataAccessException {
+        server.gameService.clear();
+        server.authService.clear();
+        server.userService.clear();
+    }
 }

@@ -1,5 +1,4 @@
 import chess.*;
-import server.Server;
 import ui.Client;
 
 public class Main {
@@ -8,7 +7,7 @@ public class Main {
         System.out.println("♕ 240 Chess Client: " + piece);
 
         Client client = new Client();
-        client.run(args);
+        client.run();
 
     }
 

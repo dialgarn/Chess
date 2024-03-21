@@ -18,8 +18,7 @@ import java.util.Map;
 
 public class GameRequests {
 
-
-    public void createGame(String gameName, String authToken, String url) throws Exception {
+    public void createGame(String gameName, String authToken, String url) throws DataAccessException {
         String requestBody = new Gson().toJson(Map.of(
                 "gameName", gameName
         ));
@@ -42,15 +41,22 @@ public class GameRequests {
                 throw new DataAccessException(response.body());
             }
         } catch (Throwable e) {
-            throw new Exception(e.getMessage());
+            throw new DataAccessException(e.getMessage());
         }
     }
 
-    public void joinGame(String authToken, int gameID, String teamcolor, String url) throws Exception {
-        String requestBody = new Gson().toJson(Map.of(
-                "playerColor", teamcolor,
-                "gameID", gameID
-        ));
+    public void joinGame(String authToken, int gameID, String teamColor, String url) throws DataAccessException {
+        String requestBody;
+        if (teamColor != null) {
+            requestBody = new Gson().toJson(Map.of(
+                    "playerColor", teamColor,
+                    "gameID", gameID
+            ));
+        } else {
+            requestBody = new Gson().toJson(Map.of(
+                    "gameID", gameID
+            ));
+        }
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -61,19 +67,26 @@ public class GameRequests {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            JsonObject responseBodyJson = new Gson().fromJson(response.body(), JsonObject.class);
             if (response.statusCode() == 200) {
-
+                ArrayList<GameData> games = (ArrayList<GameData>) getGames(authToken, url);
+                GameData gameToPrint = null;
+                for (var game : games) {
+                    if (game.gameID() == gameID) {
+                        gameToPrint = game;
+                    }
+                }
+                assert gameToPrint != null;
+                System.out.println(gameToPrint.game().getBoard().realToString());
 
             } else {
                 throw new DataAccessException(response.body());
             }
         } catch (Throwable e) {
-            throw new Exception(e.getMessage());
+            throw new DataAccessException(e.getMessage());
         }
     }
 
-    public Collection<GameData> listGames(String authToken, String url) throws Exception {
+    public Collection<GameData> getGames(String authToken, String url) throws DataAccessException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -95,7 +108,7 @@ public class GameRequests {
                 throw new DataAccessException(response.body());
             }
         } catch (Throwable e) {
-            throw new Exception(e.getMessage());
+            throw new DataAccessException(e.getMessage());
         }
     }
 

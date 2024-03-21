@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -15,6 +16,7 @@ public class ChessGame {
     private ChessBoard board;
 
     public ChessGame() {
+        board = new ChessBoard();
     }
 
     /**
@@ -198,4 +200,10 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return this.board;
     }
+
+//    @Override
+//    public String toString() {
+//        return this.board.toString();
+//    }
+
 }

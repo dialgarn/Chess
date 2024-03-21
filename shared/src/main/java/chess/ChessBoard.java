@@ -1,6 +1,10 @@
 package chess;
 
+import ui.EscapeSequences;
+
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -11,8 +15,30 @@ import java.util.Arrays;
 public class ChessBoard implements Cloneable {
     private ChessPiece[][] board;
 
+    Map<ChessPiece.PieceType, String> whitePieceCharacters = new EnumMap<>(ChessPiece.PieceType.class);
+    Map<ChessPiece.PieceType, String> blackPieceCharacters = new EnumMap<>(ChessPiece.PieceType.class);
+
+    Map<ChessGame.TeamColor, Map<ChessPiece.PieceType, String>> pieceCharacters = new EnumMap<>(ChessGame.TeamColor.class);
+
     public ChessBoard() {
         this.board = new ChessPiece[8][8];
+        resetBoard();
+        whitePieceCharacters.put(ChessPiece.PieceType.KING, EscapeSequences.WHITE_KING);
+        whitePieceCharacters.put(ChessPiece.PieceType.QUEEN, EscapeSequences.WHITE_QUEEN);
+        whitePieceCharacters.put(ChessPiece.PieceType.BISHOP, EscapeSequences.WHITE_BISHOP);
+        whitePieceCharacters.put(ChessPiece.PieceType.KNIGHT, EscapeSequences.WHITE_KNIGHT);
+        whitePieceCharacters.put(ChessPiece.PieceType.ROOK, EscapeSequences.WHITE_ROOK);
+        whitePieceCharacters.put(ChessPiece.PieceType.PAWN, EscapeSequences.WHITE_PAWN);
+
+        blackPieceCharacters.put(ChessPiece.PieceType.KING, EscapeSequences.BLACK_KING);
+        blackPieceCharacters.put(ChessPiece.PieceType.QUEEN, EscapeSequences.BLACK_QUEEN);
+        blackPieceCharacters.put(ChessPiece.PieceType.BISHOP, EscapeSequences.BLACK_BISHOP);
+        blackPieceCharacters.put(ChessPiece.PieceType.KNIGHT, EscapeSequences.BLACK_KNIGHT);
+        blackPieceCharacters.put(ChessPiece.PieceType.ROOK, EscapeSequences.BLACK_ROOK);
+        blackPieceCharacters.put(ChessPiece.PieceType.PAWN, EscapeSequences.BLACK_PAWN);
+
+        pieceCharacters.put(ChessGame.TeamColor.WHITE, whitePieceCharacters);
+        pieceCharacters.put(ChessGame.TeamColor.BLACK, blackPieceCharacters);
     }
 
     /**
@@ -109,6 +135,67 @@ public class ChessBoard implements Cloneable {
     private void wipeBoard() {
         board = new ChessPiece[8][8];
     }
+
+    public String realToString() {
+        StringBuilder output = new StringBuilder();
+        output.append("     h     g     f     e     d     c     b     a\n");
+        // Add top border
+        output.append("  +-----------------------------------------------+\n");
+
+        // Add rows with pieces
+        // Print the board with white at the bottom
+        for (int i = 7; i >= 0; i--) {
+            // Add row label
+            output.append(i + 1).append(" |");
+
+            for (int j = 0; j < 8; j++) {
+                ChessPosition pieceLocation = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = getPiece(pieceLocation);
+                output.append(piece == null ? "     |" : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " |");
+            }
+
+            // Add row label again at the end of the row
+            output.append(" ").append(i + 1).append("\n");
+        }
+
+        // Add bottom border
+        output.append("  +-----------------------------------------------+\n");
+
+        // Add column labels
+        output.append("     h     g     f     e     d     c     b     a\n\n\n");
+
+        output.append("     a     b     c     d     e     f     g     h\n");
+
+
+        // Print the board with black at the bottom
+        for (int i = 0; i < 8; i++) {
+            // Add row label
+            output.append(8 - i).append(" |");
+
+            for (int j = 7; j >= 0; j--) {
+                ChessPosition pieceLocation = new ChessPosition(i + 1, j + 1);
+                ChessPiece piece = getPiece(pieceLocation);
+                output.append(piece == null ? "     |" : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " |");
+            }
+
+            // Add row label again at the end of the row
+            output.append(" ").append(8 - i).append("\n");
+        }
+
+        // Add bottom border
+        output.append("  +-----------------------------------------------+\n");
+
+        // Add column labels
+        output.append("     a     b     c     d     e     f     g     h\n");
+
+        ChessPiece piece = getPiece(new ChessPosition(1, 1));
+        output.append(pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()));
+        output.append(piece.getPieceType());
+        output.append(piece.getTeamColor());
+
+        return output.toString();
+    }
+
 
     @Override
     public boolean equals(Object o) {
