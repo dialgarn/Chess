@@ -161,8 +161,10 @@ public class ChessBoard implements Cloneable {
         // Add column labels
         output.append("     h     g     f     e     d     c     b     a\n\n\n");
 
+        // Add column labels
         output.append("     a     b     c     d     e     f     g     h\n");
-
+        // Add top border
+        output.append("  +-----------------------------------------------+\n");
 
         // Print the board with black at the bottom
         for (int i = 0; i < 8; i++) {

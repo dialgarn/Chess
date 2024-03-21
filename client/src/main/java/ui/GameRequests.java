@@ -121,9 +121,8 @@ public class GameRequests {
         String gameName = gameObject.get("gameName").getAsString();
         // Deserialize the game object
         JsonObject gameJson = gameObject.getAsJsonObject("game");
-        // Assuming you have a method to deserialize ChessGame from JsonObject
+
         ChessGame game = new Gson().fromJson(gameJson, ChessGame.class);
-        // Assuming you have a constructor in GameData that takes gameID and gameName
         return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
 
