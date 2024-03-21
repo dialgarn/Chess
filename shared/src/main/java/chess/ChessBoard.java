@@ -188,11 +188,6 @@ public class ChessBoard implements Cloneable {
         // Add column labels
         output.append("     a     b     c     d     e     f     g     h\n");
 
-        ChessPiece piece = getPiece(new ChessPosition(1, 1));
-        output.append(pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()));
-        output.append(piece.getPieceType());
-        output.append(piece.getTeamColor());
-
         return output.toString();
     }
 
