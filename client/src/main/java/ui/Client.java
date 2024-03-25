@@ -96,8 +96,12 @@ public class Client {
                     case "list":
                         try {
                             ArrayList<GameData> games = (ArrayList<GameData>) gameRequests.getGames(authToken, gameUrl);
-                            for (var game : games) {
-                                System.out.println(game);
+                            if (!games.isEmpty()) {
+                                for (var game : games) {
+                                    System.out.println(game);
+                                }
+                            } else {
+                                System.out.println("There are no games to list.");
                             }
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
