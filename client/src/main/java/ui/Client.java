@@ -2,7 +2,9 @@ package ui;
 
 import dataAccess.DataAccessException;
 import model.GameData;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.Server;
+import server.webSocket.WebSocketHandler;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,6 +19,7 @@ public class Client {
     private final String sessionUrl;
     private final String userUrl;
     private final String gameUrl;
+    private final WebSocketHandler ws;
 
 
     public Client() {
@@ -26,6 +29,7 @@ public class Client {
         sessionUrl = "http://localhost:" + server.port() + "/session";
         userUrl = "http://localhost:" + server.port() + "/user";
         gameUrl = "http://localhost:" + server.port() + "/game";
+        ws = new WebSocketHandler();
     }
 
     public void run() {
@@ -113,6 +117,7 @@ public class Client {
                         teamColor = teamColor.toUpperCase();
                         try {
                             gameRequests.joinGame(authToken, gameID, teamColor, gameUrl);
+
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }

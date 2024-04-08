@@ -7,6 +7,7 @@ import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.eclipse.jetty.websocket.server.WebSocketServerConnection;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -28,7 +29,8 @@ public class Server {
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
-        // Spark.webSocket("/connect", WebSocketServerConnection.class);
+        Spark.webSocket("/connect", WebSocketServerConnection.class);
+        Spark.get("/echo/:msg", (req, res) -> "HTTP response: " + req.params(":msg"));
         Spark.staticFiles.location("web");
 
         try {
