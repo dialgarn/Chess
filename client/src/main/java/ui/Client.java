@@ -7,6 +7,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.Server;
 import server.webSocket.WebSocketHandler;
 import ui.websocket.WebSocketFacade;
+import webSocketMessages.serverMessages.LoadGameMessage;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -121,6 +122,20 @@ public class Client {
                         try {
                             gameRequests.joinGame(authToken, gameID, teamColor, gameUrl);
                             ws = new WebSocketFacade(serverURL);
+
+                            ws.setMessageReceivedCallback(message -> {
+                                if (message instanceof LoadGameMessage loadGameMessage) {
+                                    GameData game = loadGameMessage.getGame();
+                                    var color = loadGameMessage.getTeamColor();
+                                    if (color == ChessGame.TeamColor.WHITE) {
+                                        System.out.println(game.game().getBoard().realToStringWhite());
+                                    } else {
+                                        System.out.println(game.game().getBoard().realToStringBlack());
+                                    }
+                                }
+                                // You might want to reset the callback here or set a flag that the message has been received
+                            });
+
                             ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());

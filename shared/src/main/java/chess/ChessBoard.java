@@ -163,7 +163,7 @@ public class ChessBoard implements Cloneable {
 
         return output.toString();
     }
-    
+
     public String realToStringWhite() {
         StringBuilder output = new StringBuilder();
         // Add column labels

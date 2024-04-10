@@ -80,7 +80,7 @@ public class WebSocketHandler {
         }
         assert gameToPrint != null;
 
-        var game = new LoadGameMessage(gameToPrint);
+        var game = new LoadGameMessage(gameToPrint, command.getTeamColor());
         session.getRemote().sendString(new Gson().toJson(game));
 
         connections.broadcast(command.getAuthString(), jsonMessage);
