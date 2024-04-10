@@ -2,6 +2,8 @@ package server.webSocket;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dataAccess.DataAccessException;
 import dataAccess.DatabaseAuthDAO;
 import dataAccess.DatabaseGameDAO;
@@ -11,6 +13,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.*;
 import service.AuthService;
+import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.userCommands.JoinCommand;
@@ -32,7 +35,14 @@ public class WebSocketHandler {
                 switch (command.getCommandType()) {
                     case JOIN_PLAYER:
                         // Handle join player command
-                        JoinCommand joinCommand = new Gson().fromJson(message, JoinCommand.class);
+                        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
+                        String playerColorValue = jsonObject.get("playerColor").getAsString();
+                        ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(playerColorValue.toUpperCase());
+
+                        String auth = jsonObject.get("authToken").getAsString();
+                        int gameID = jsonObject.get("gameID").getAsInt();
+
+                        JoinCommand joinCommand = new JoinCommand(auth, color, gameID);
                         joinPlayer(joinCommand, session);
                         break;
                     case JOIN_OBSERVER:
@@ -60,16 +70,12 @@ public class WebSocketHandler {
         connections.add(command.getAuthString(), command.getGameID(), session);
         AuthData auth = authDAO.verify(command.getAuthString());
 
-        String teamColor;
+        String teamColor = "";
         if (command.getTeamColor() == ChessGame.TeamColor.WHITE) {
             teamColor = "White";
         } else {
             teamColor = "Black";
         }
-        var message = String.format("%s joined the game for the %s team", auth.username(), teamColor);
-        var notification = new NotificationMessage(message);
-        // Convert notification message to JSON
-        String jsonMessage = new Gson().toJson(notification);
 
         var games = gameDao.listGames();
         GameData gameToPrint = null;
@@ -80,10 +86,39 @@ public class WebSocketHandler {
         }
         assert gameToPrint != null;
 
+        boolean spotTaken = false;
+        ErrorMessage error = null;
+
+        // Check if the WHITE team spot is already taken
+        if (command.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            if (gameToPrint.whiteUsername() == null || !gameToPrint.whiteUsername().equals(auth.username())) {
+                spotTaken = true;
+                error = new ErrorMessage("Team spot is already taken");
+            }
+        }
+        // Check if the BLACK team spot is already taken
+        else if (command.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            if (gameToPrint.blackUsername() == null || (!gameToPrint.blackUsername().equals(auth.username()))) {
+                spotTaken = true;
+                error = new ErrorMessage("Team spot is already taken");
+            }
+        }
+
+        // If the spot is taken, send an error message
+        if (spotTaken && session.isOpen()) {
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        }
+
         var game = new LoadGameMessage(gameToPrint, command.getTeamColor());
         session.getRemote().sendString(new Gson().toJson(game));
 
+        var message = String.format("%s joined the game for the %s team", auth.username(), teamColor);
+        var notification = new NotificationMessage(message);
+        // Convert notification message to JSON
+        String jsonMessage = new Gson().toJson(notification);
         connections.broadcast(command.getAuthString(), jsonMessage);
     }
+
 
 }

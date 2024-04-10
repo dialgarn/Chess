@@ -60,6 +60,9 @@ public class WebSocketFacade extends Endpoint {
                                 System.out.println(game.game().getBoard().realToStringBlack());
                             }
                             break;
+                        case ERROR:
+                            ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+                            System.out.println(errorMessage);
                     }
 
                     messageLatch.countDown();
@@ -92,4 +95,5 @@ public class WebSocketFacade extends Endpoint {
             messageLatch = new CountDownLatch(1);
         }
     }
+
 }
