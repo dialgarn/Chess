@@ -76,7 +76,7 @@ public class GameRequests {
                     }
                 }
                 assert gameToPrint != null;
-                System.out.println(gameToPrint.game().getBoard().realToString());
+                // System.out.println(gameToPrint.game().getBoard().realToString());
 
             } else {
                 throw new DataAccessException(response.body());

@@ -133,7 +133,7 @@ public class ChessBoard implements Cloneable {
         board = new ChessPiece[8][8];
     }
 
-    public String realToString() {
+    public String realToStringBlack() {
         StringBuilder output = new StringBuilder();
         output.append("     h     g     f     e     d     c     b     a\n");
         // Add top border
@@ -161,6 +161,11 @@ public class ChessBoard implements Cloneable {
         // Add column labels
         output.append("     h     g     f     e     d     c     b     a\n\n\n");
 
+        return output.toString();
+    }
+    
+    public String realToStringWhite() {
+        StringBuilder output = new StringBuilder();
         // Add column labels
         output.append("     a     b     c     d     e     f     g     h\n");
         // Add top border

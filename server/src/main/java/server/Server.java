@@ -7,7 +7,7 @@ import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.eclipse.jetty.websocket.server.WebSocketServerConnection;
+import server.webSocket.WebSocketHandler;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -24,13 +24,15 @@ public class Server {
     public final UserService userService = new UserService(new DatabaseUserDAO());
     public final AuthService authService = new AuthService(new DatabaseAuthDAO());
     public final GameService gameService = new GameService(new DatabaseGameDAO());
+    private final WebSocketHandler webSocketHandler;
 
-    public Server() {}
+    public Server() {
+        webSocketHandler = new WebSocketHandler();
+    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
-        Spark.webSocket("/connect", WebSocketServerConnection.class);
-        Spark.get("/echo/:msg", (req, res) -> "HTTP response: " + req.params(":msg"));
+
         Spark.staticFiles.location("web");
 
         try {
@@ -39,6 +41,9 @@ public class Server {
         } catch (DataAccessException | SQLException e) {
             return 500;
         }
+
+        Spark.webSocket("/connect", webSocketHandler);
+        Spark.get("/echo/:msg", (req, res) -> "HTTP response: " + req.params(":msg"));
 
         Spark.delete("/db", this::clear);
         Spark.post("/user", this::register);
