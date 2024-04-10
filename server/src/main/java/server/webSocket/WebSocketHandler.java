@@ -68,8 +68,12 @@ public class WebSocketHandler {
 
     public void joinPlayer(JoinCommand command, Session session) throws IOException, DataAccessException {
         connections.add(command.getAuthString(), command.getGameID(), session);
-        AuthData auth = authDAO.verify(command.getAuthString());
-
+        AuthData auth = null;
+        try {
+            auth = authDAO.verify(command.getAuthString());
+        } catch (Throwable e) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Not Authorized")));
+        }
         String teamColor = "";
         if (command.getTeamColor() == ChessGame.TeamColor.WHITE) {
             teamColor = "White";
@@ -84,7 +88,9 @@ public class WebSocketHandler {
                 gameToPrint = game;
             }
         }
-        assert gameToPrint != null;
+        if (gameToPrint == null) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Game does not exists")));
+        }
 
         boolean spotTaken = false;
         ErrorMessage error = null;
