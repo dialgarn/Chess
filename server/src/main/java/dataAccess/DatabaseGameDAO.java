@@ -37,6 +37,36 @@ public class DatabaseGameDAO implements GameDAO {
         }
     }
 
+    public void updateChessGame(int gameID, ChessGame game) throws DataAccessException {
+        // Serialize the GameData object into a String (assuming you're using JSON serialization)
+        String serializedGameData = new Gson().toJson(game);
+
+        try (Connection c = DatabaseManager.getConnection()) {
+            // First, check if the game exists
+            String checkGameExists = "SELECT * FROM games WHERE game_id = ?";
+            try (PreparedStatement checkStmt = c.prepareStatement(checkGameExists)) {
+                checkStmt.setInt(1, gameID);
+                ResultSet rs = checkStmt.executeQuery();
+                if (!rs.next()) {
+                    throw new DataAccessException("Game not found");
+                }
+            }
+
+            // Update the game_data for the specified gameID
+            String updateGameData = "UPDATE games SET game_data = ? WHERE game_id = ?";
+            try (PreparedStatement updateStmt = c.prepareStatement(updateGameData)) {
+                updateStmt.setString(1, serializedGameData); // Set the serialized GameData
+                updateStmt.setInt(2, gameID); // Specify which game to update
+                int rowsAffected = updateStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    // If no rows were affected, it means the gameID does not exist
+                    throw new DataAccessException("Game not found");
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Error updating game data: " + e.getMessage());
+        }
+    }
     @Override
     public void joinGame(int gameID, ChessGame.TeamColor playerColor, String playerName) throws DataAccessException {
         try (Connection c = DatabaseManager.getConnection()) {
@@ -94,6 +124,33 @@ public class DatabaseGameDAO implements GameDAO {
             throw new DataAccessException("Bad Request");
         }
     }
+
+    public void playerLeavesGame(int gameID, ChessGame.TeamColor playerColor) throws DataAccessException {
+        try (Connection c = DatabaseManager.getConnection()) {
+            // Define the SQL statement based on the player's color
+            String updatePlayer;
+            if (playerColor == ChessGame.TeamColor.WHITE) {
+                updatePlayer = "UPDATE games SET white_user_id = NULL WHERE game_id = ?";
+            } else if (playerColor == ChessGame.TeamColor.BLACK) {
+                updatePlayer = "UPDATE games SET black_user_id = NULL WHERE game_id = ?";
+            } else {
+                throw new IllegalArgumentException("Invalid player color");
+            }
+
+            // Execute the update
+            try (PreparedStatement updateStmt = c.prepareStatement(updatePlayer)) {
+                updateStmt.setInt(1, gameID);
+                int rowsAffected = updateStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    // If no rows were affected, it means the gameID does not exist
+                    throw new DataAccessException("Game not found");
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error updating player status: " + e.getMessage());
+        }
+    }
+
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
         ArrayList<GameData> games = new ArrayList<>();

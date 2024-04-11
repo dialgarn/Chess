@@ -60,7 +60,7 @@ public class WebSocketHandler {
                         ChessMove chessMove = new Gson().fromJson(moveObject, ChessMove.class);
                         JsonObject teamColor = jsonObject.getAsJsonObject("playerColor");
                         ChessGame.TeamColor playerColor = new Gson().fromJson(teamColor, ChessGame.TeamColor.class);
-                        MakeMoveCommand makeMoveCommand = new MakeMoveCommand(auth, chessMove, gameID, playerColor);
+                        MakeMoveCommand makeMoveCommand = new MakeMoveCommand(auth, chessMove, gameID);
                         makeMove(makeMoveCommand, session);
                         break;
                     case LEAVE:
@@ -88,11 +88,11 @@ public class WebSocketHandler {
         GameData game = getGameToPrint(command.getGameID(), session);
 
         assert game != null;
-//        if (game.whiteUsername() != null && Objects.equals(auth.username(), game.whiteUsername())) {
-//            gameDao.joinGame(game.gameID(), ChessGame.TeamColor.WHITE, "");
-//        } else if (game.blackUsername() != null && Objects.equals(auth.username(), game.blackUsername())) {
-//            gameDao.joinGame(game.gameID(), ChessGame.TeamColor.BLACK, "");
-//        }
+        if (game.whiteUsername() != null && Objects.equals(auth.username(), game.whiteUsername())) {
+            gameDao.playerLeavesGame(game.gameID(), ChessGame.TeamColor.WHITE);
+        } else if (game.blackUsername() != null && Objects.equals(auth.username(), game.blackUsername())) {
+            gameDao.playerLeavesGame(game.gameID(), ChessGame.TeamColor.BLACK);
+        }
 
         connections.broadcast(command.getAuthString(), new Gson().toJson(notification));
         connections.remove(command.getAuthString());
@@ -106,36 +106,52 @@ public class WebSocketHandler {
         GameData game = getGameToPrint(command.getGameID(), session);
 
         assert game != null;
-        if (!Objects.equals(auth.username(), game.blackUsername()) || !Objects.equals(auth.username(), game.whiteUsername())) {
+        if (!Objects.equals(auth.username(), game.blackUsername()) && !Objects.equals(auth.username(), game.whiteUsername())) {
             ErrorMessage error = new ErrorMessage("An observer cannot resign.");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        }
+        if (game.game().isGame_over()) {
+            ErrorMessage error = new ErrorMessage("Game already over.");
             session.getRemote().sendString(new Gson().toJson(error));
             return;
         }
 
         game.game().setGame_over(true);
+        gameDao.updateChessGame(game.gameID(), game.game());
         connections.broadcast("", jsonMessage);
         connections.remove(command.getAuthString());
     }
 
     public void makeMove(MakeMoveCommand command, Session session) throws IOException, DataAccessException, InvalidMoveException {
+        AuthData auth = authDAO.verify(command.getAuthString());
         ChessMove move = command.getMove();
         GameData game = getGameToPrint(command.getGameID(), session);
         assert game != null;
 
-        if (game.game().isGame_over()) {
-            ErrorMessage errorMessage = new ErrorMessage("Game Over");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
+        ChessGame.TeamColor color = null;
+        if (Objects.equals(game.whiteUsername(), auth.username())) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if (Objects.equals(game.blackUsername(), auth.username())) {
+            color = ChessGame.TeamColor.BLACK;
         }
 
-        if (command.getPlayerColor() != game.game().getTeamTurn()) {
+
+        if (color != game.game().getTeamTurn()) {
             ErrorMessage errorMessage = new ErrorMessage("Not your turn");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
 
-        if (command.getPlayerColor() != game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor()) {
+        if (color != game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor()) {
             ErrorMessage errorMessage = new ErrorMessage("Not your piece");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+
+        if (game.game().isGame_over()) {
+            ErrorMessage errorMessage = new ErrorMessage("Game Over");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
@@ -149,6 +165,29 @@ public class WebSocketHandler {
             return;
         }
 
+
+        boolean whiteCheck = game.game().isInCheck(ChessGame.TeamColor.WHITE);
+        boolean blackCheck = game.game().isInCheck(ChessGame.TeamColor.BLACK);
+
+        boolean blackCheckmate = game.game().isInCheckmate(ChessGame.TeamColor.BLACK);
+        boolean whiteCheckMate = game.game().isInCheckmate(ChessGame.TeamColor.WHITE);
+        if (whiteCheckMate) {
+            game.game().setGame_over(true);
+            NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.whiteUsername()));
+            connections.broadcast("", new Gson().toJson(checkmate));
+        } else if (blackCheckmate) {
+            game.game().setGame_over(true);
+            NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.blackUsername()));
+            connections.broadcast("", new Gson().toJson(checkmate));
+        } else if (whiteCheck) {
+            NotificationMessage check = new NotificationMessage(String.format("%s is in check", game.whiteUsername()));
+            connections.broadcast("", new Gson().toJson(check));
+        } else if (blackCheck) {
+            NotificationMessage check = new NotificationMessage(String.format("%s is in check", game.blackUsername()));
+            connections.broadcast("", new Gson().toJson(check));
+        }
+
+        gameDao.updateChessGame(game.gameID(), game.game());
 
         connections.broadcastMove(game);
 
