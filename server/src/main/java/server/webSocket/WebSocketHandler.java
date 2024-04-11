@@ -111,13 +111,13 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(error));
             return;
         }
-        if (game.game().isGame_over()) {
+        if (game.game().isGameOver()) {
             ErrorMessage error = new ErrorMessage("Game already over.");
             session.getRemote().sendString(new Gson().toJson(error));
             return;
         }
 
-        game.game().setGame_over(true);
+        game.game().setGameOver(true);
         gameDao.updateChessGame(game.gameID(), game.game());
         connections.broadcast("", game.gameID(), jsonMessage);
         connections.remove(command.getAuthString());
@@ -150,7 +150,7 @@ public class WebSocketHandler {
         }
 
 
-        if (game.game().isGame_over()) {
+        if (game.game().isGameOver()) {
             ErrorMessage errorMessage = new ErrorMessage("Game Over");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
@@ -172,11 +172,11 @@ public class WebSocketHandler {
         boolean blackCheckmate = game.game().isInCheckmate(ChessGame.TeamColor.BLACK);
         boolean whiteCheckMate = game.game().isInCheckmate(ChessGame.TeamColor.WHITE);
         if (whiteCheckMate) {
-            game.game().setGame_over(true);
+            game.game().setGameOver(true);
             NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.whiteUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(checkmate));
         } else if (blackCheckmate) {
-            game.game().setGame_over(true);
+            game.game().setGameOver(true);
             NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.blackUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(checkmate));
         } else if (whiteCheck) {
