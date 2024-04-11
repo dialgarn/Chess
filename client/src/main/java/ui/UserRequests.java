@@ -2,7 +2,7 @@ package ui;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 
 import java.net.URI;
 import java.net.http.HttpClient;

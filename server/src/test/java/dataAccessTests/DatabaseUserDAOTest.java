@@ -1,13 +1,11 @@
 package dataAccessTests;
 
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import dataAccess.DatabaseAuthDAO;
 import dataAccess.DatabaseGameDAO;
 import dataAccess.DatabaseUserDAO;
 import model.UserData;
 import org.junit.jupiter.api.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DatabaseUserDAOTest {
 

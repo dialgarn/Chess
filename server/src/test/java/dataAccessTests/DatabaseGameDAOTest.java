@@ -2,7 +2,7 @@ package dataAccessTests;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import dataAccess.DatabaseAuthDAO;
 import dataAccess.DatabaseGameDAO;
 import dataAccess.DatabaseUserDAO;

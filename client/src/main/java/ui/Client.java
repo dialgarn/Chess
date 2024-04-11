@@ -4,11 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import dataAccess.DataAccessException;
 import model.GameData;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import server.Server;
-import server.webSocket.WebSocketHandler;
 import ui.websocket.WebSocketFacade;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
@@ -20,11 +16,9 @@ import java.util.Scanner;
 public class Client {
     private boolean logged_in = false;
     private boolean in_game = false;
-    private boolean able_to_move = false;
     private ChessGame.TeamColor playerColor;
     String authToken = "";
     int currentGameID = 0;
-    public final Server server;
     public final UserRequests userRequests = new UserRequests();
 
     public final GameRequests gameRequests = new GameRequests();
@@ -55,13 +49,11 @@ public class Client {
     );
 
     public Client() {
-        server = new Server();
-        var port = server.run(0);
-        System.out.println("Started test HTTP server on " + port);
-        sessionUrl = "http://localhost:" + server.port() + "/session";
-        userUrl = "http://localhost:" + server.port() + "/user";
-        gameUrl = "http://localhost:" + server.port() + "/game";
-        serverURL = "http://localhost:" + server.port();
+        System.out.println("Started test HTTP server on 8080");
+        sessionUrl = "http://localhost:8080/session";
+        userUrl = "http://localhost:8080/user";
+        gameUrl = "http://localhost:8080/game";
+        serverURL = "http://localhost:8080";
     }
 
     public void run() {
@@ -178,7 +170,6 @@ public class Client {
                             currentGameID = gameID;
                             ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
                             in_game = true;
-                            able_to_move = true;
                             playerColor = ChessGame.TeamColor.valueOf(teamColor);
                             ws.setPlayerColor(playerColor);
                         } catch (Throwable e) {
@@ -196,7 +187,6 @@ public class Client {
                         try {
                             ws = new WebSocketFacade(serverURL);
                             ws.leave(authToken, currentGameID);
-                            able_to_move = false;
                             in_game = false;
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
@@ -214,7 +204,6 @@ public class Client {
                                 // You might want to reset the callback here or set a flag that the message has been received
                             });
 
-                            able_to_move = false;
                             in_game = false;
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
@@ -269,19 +258,6 @@ public class Client {
 
                             ChessMove move = new ChessMove(startPosition, endPosition, promotion);
                             ws = new WebSocketFacade(serverURL);
-
-                            ws.setMessageReceivedCallback(message -> {
-                                if (message instanceof LoadGameMessage loadGameMessage) {
-                                    GameData game = loadGameMessage.getGame();
-                                    var color = loadGameMessage.getTeamColor();
-                                    if (playerColor == ChessGame.TeamColor.WHITE) {
-                                        System.out.println(game.game().getBoard().realToStringWhite());
-                                    } else {
-                                        System.out.println(game.game().getBoard().realToStringBlack());
-                                    }
-                                }
-                                // You might want to reset the callback here or set a flag that the message has been received
-                            });
                             ws.move(authToken, move, currentGameID);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
@@ -296,8 +272,6 @@ public class Client {
             }
 
         }
-
-        server.stop();
     }
 
     private void observe(int gameID) {
@@ -353,11 +327,5 @@ public class Client {
         } catch (Throwable e) {
             System.out.println(e.getMessage());
         }
-    }
-
-    public void clear() throws DataAccessException {
-        server.gameService.clear();
-        server.authService.clear();
-        server.userService.clear();
     }
 }

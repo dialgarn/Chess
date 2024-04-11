@@ -6,7 +6,7 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import dataAccess.DatabaseAuthDAO;
 import dataAccess.DatabaseGameDAO;
 import model.AuthData;

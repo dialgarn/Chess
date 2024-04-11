@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import model.GameData;
 
 import java.net.URI;

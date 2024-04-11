@@ -1,6 +1,6 @@
 package service;
 
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import dataAccess.UserDAO;
 import model.UserData;
 

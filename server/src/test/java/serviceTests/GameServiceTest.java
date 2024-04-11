@@ -1,8 +1,7 @@
 package serviceTests;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import model.AuthData;
@@ -12,11 +11,7 @@ import org.junit.jupiter.api.Test;
 import service.AuthService;
 import service.GameService;
 
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
 

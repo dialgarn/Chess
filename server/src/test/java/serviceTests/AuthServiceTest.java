@@ -1,7 +1,7 @@
 package serviceTests;
 
 
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import dataAccess.MemoryAuthDAO;
 import model.AuthData;
 import model.UserData;
@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import service.AuthService;
 
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class AuthServiceTest {
 

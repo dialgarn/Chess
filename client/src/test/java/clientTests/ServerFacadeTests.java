@@ -1,6 +1,6 @@
 package clientTests;
 
-import dataAccess.DataAccessException;
+import Exception.DataAccessException;
 import org.junit.jupiter.api.*;
 import ui.Client;
 

@@ -14,6 +14,7 @@ import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
+import Exception.DataAccessException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class Server {
         try {
             DatabaseManager.createDatabase();
             DatabaseManager.setupDatabase();
-        } catch (DataAccessException | SQLException e) {
+        } catch (SQLException e) {
             return 500;
         }
 
