@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 public class WebSocketFacade extends Endpoint {
 
     Session session;
-    NotificationHandler notificationHandler;
     private CountDownLatch messageLatch;
 
     private ChessGame.TeamColor playerColor;
@@ -38,7 +37,6 @@ public class WebSocketFacade extends Endpoint {
             messageLatch = new CountDownLatch(1);
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/connect");
-            this.notificationHandler = new NotificationHandler();
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -72,8 +70,6 @@ public class WebSocketFacade extends Endpoint {
                     }
 
                     messageLatch.countDown();
-
-                    // notificationHandler.notify(notification);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {

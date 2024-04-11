@@ -14,13 +14,13 @@ public class DatabaseUserDAO implements UserDAO {
             throw new DataAccessException("Bad Request");
         }
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encrypted_password = encoder.encode(user.password());
+        String encryptedPassword = encoder.encode(user.password());
         try (Connection c = DatabaseManager.getConnection()) {
             String insertUser = "INSERT INTO users(username, password, email) " +
                                         "VALUES(?, ?, ?)";
             try (PreparedStatement stmt = c.prepareStatement(insertUser)) {
                 stmt.setString(1, user.username());
-                stmt.setString(2, encrypted_password);
+                stmt.setString(2, encryptedPassword);
                 stmt.setString(3, user.email());
                 stmt.executeUpdate();
                 return user;

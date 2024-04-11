@@ -15,14 +15,14 @@ public class ChessGame {
     private TeamColor team = TeamColor.WHITE;
     private ChessBoard board;
 
-    private boolean game_over = false;
+    private boolean gameOver = false;
 
-    public boolean isGame_over() {
-        return game_over;
+    public boolean isGameOver() {
+        return gameOver;
     }
 
-    public void setGame_over(boolean game_over) {
-        this.game_over = game_over;
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     public ChessGame() {

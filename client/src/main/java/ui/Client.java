@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
-    private boolean logged_in = false;
-    private boolean in_game = false;
+    private boolean loggedIn = false;
+    private boolean inGame = false;
     private ChessGame.TeamColor playerColor;
     String authToken = "";
     int currentGameID = 0;
@@ -63,10 +63,10 @@ public class Client {
 
         label:
         while (true) {
-            if (in_game) {
+            if (inGame) {
                 System.out.print("\r[IN_GAME} >>> ");
             } else {
-                if (!logged_in) {
+                if (!loggedIn) {
                     System.out.print("\r[LOGGED_OUT] >>> ");
                 } else {
                     System.out.print("\r[LOGGED_IN] >>> ");
@@ -90,7 +90,7 @@ public class Client {
                             String password = tokens[2];
                             try {
                                 authToken = userRequests.login(username, password, sessionUrl);
-                                logged_in = true;
+                                loggedIn = true;
                             } catch (Throwable e) {
                                 System.out.println(e.getMessage());
                             }
@@ -105,7 +105,7 @@ public class Client {
                             String email = tokens[3];
                             try {
                                 authToken = userRequests.register(username, password, email, userUrl);
-                                logged_in = true;
+                                loggedIn = true;
                             } catch (Throwable e) {
                                 System.out.println(e.getMessage());
                             }
@@ -144,7 +144,7 @@ public class Client {
                         if (tokens.length == 2) {
                             gameID = Integer.parseInt(tokens[1]);
                             observe(gameID);
-                            in_game = true;
+                            inGame = true;
                             currentGameID = gameID;
                             break;
                         }
@@ -169,7 +169,7 @@ public class Client {
                             });
                             currentGameID = gameID;
                             ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
-                            in_game = true;
+                            inGame = true;
                             playerColor = ChessGame.TeamColor.valueOf(teamColor);
                             ws.setPlayerColor(playerColor);
                         } catch (Throwable e) {
@@ -179,7 +179,7 @@ public class Client {
                     case "observe":
                         gameID = Integer.parseInt(tokens[1]);
                         observe(gameID);
-                        in_game = true;
+                        inGame = true;
                         currentGameID = gameID;
                         playerColor = ChessGame.TeamColor.WHITE;
                         break;
@@ -187,7 +187,7 @@ public class Client {
                         try {
                             ws = new WebSocketFacade(serverURL);
                             ws.leave(authToken, currentGameID);
-                            in_game = false;
+                            inGame = false;
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
@@ -204,7 +204,7 @@ public class Client {
                                 // You might want to reset the callback here or set a flag that the message has been received
                             });
 
-                            in_game = false;
+                            inGame = false;
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
@@ -264,7 +264,7 @@ public class Client {
                         }
                         break;
                     case "quit":
-                        if (logged_in) {
+                        if (loggedIn) {
                             logout();
                         }
                         break label;
@@ -294,7 +294,7 @@ public class Client {
 
 
     private void printHelp() {
-        if (in_game) {
+        if (inGame) {
             System.out.println("   redraw - the chessboard");
             System.out.println("   move <START> <END> [<PROMOTION_PIECE>|<empty>]- make a move");
             System.out.println("   highlight - legal moves");
@@ -302,7 +302,7 @@ public class Client {
             System.out.println("   resign - forfeit the match");
             System.out.println("   help - with possible commands");
         } else {
-            if (!logged_in) {
+            if (!loggedIn) {
                 System.out.println("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
                 System.out.println("   login <USERNAME> <PASSWORD> - to play chess");
                 System.out.println("   quit - playing chess");
@@ -322,7 +322,7 @@ public class Client {
     public void logout() {
         try {
             userRequests.logout(authToken, sessionUrl);
-            logged_in = false;
+            loggedIn = false;
             authToken = "";
         } catch (Throwable e) {
             System.out.println(e.getMessage());
