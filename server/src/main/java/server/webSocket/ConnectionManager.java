@@ -20,6 +20,7 @@ public class ConnectionManager {
 
     public void remove(String authToken) {
         connections.remove(authToken);
+        games.remove(authToken);
     }
 
     public void broadcast(String excludeAuthToken, String notification) {

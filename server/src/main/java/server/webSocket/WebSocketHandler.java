@@ -12,12 +12,12 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.*;
-import service.AuthService;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.userCommands.JoinCommand;
 import webSocketMessages.userCommands.JoinObserver;
+import webSocketMessages.userCommands.LeaveCommand;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
@@ -33,24 +33,21 @@ public class WebSocketHandler {
         try {
             // Deserialize the incoming JSON message into a command object
             UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+            JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
+            String auth = jsonObject.get("authToken").getAsString();;
+            int gameID;
                 switch (command.getCommandType()) {
                     case JOIN_PLAYER:
                         // Handle join player command
-                        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
                         String playerColorValue = jsonObject.get("playerColor").getAsString();
                         ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(playerColorValue.toUpperCase());
-
-                        String auth = jsonObject.get("authToken").getAsString();
-                        int gameID = jsonObject.get("gameID").getAsInt();
+                        gameID = jsonObject.get("gameID").getAsInt();
 
                         JoinCommand joinCommand = new JoinCommand(auth, color, gameID);
                         joinPlayer(joinCommand, session);
                         break;
                     case JOIN_OBSERVER:
                         // Handle join observer command
-                        jsonObject = JsonParser.parseString(message).getAsJsonObject();
-
-                        auth = jsonObject.get("authToken").getAsString();
                         gameID = jsonObject.get("gameID").getAsInt();
 
                         JoinObserver observerCommand = new JoinObserver(auth, gameID);
@@ -60,6 +57,10 @@ public class WebSocketHandler {
                         // Handle make move command
                         makeMove(command, session);
                         break;
+                    case LEAVE:
+                        // Handle leave command
+                        LeaveCommand leaveCommand = new LeaveCommand(auth);
+                        leave(leaveCommand, session);
                 }
         } catch (Exception e) {
             // Handle exceptions
@@ -67,11 +68,18 @@ public class WebSocketHandler {
         }
     }
 
+    public void leave(LeaveCommand command, Session session) throws IOException, DataAccessException {
+        AuthData auth = authDAO.verify(command.getAuthString());
+        NotificationMessage notification = new NotificationMessage(String.format("%s left the game", auth.username()));
+        connections.broadcast(command.getAuthString(), new Gson().toJson(notification));
+        connections.remove(command.getAuthString());
+    }
+
     public void makeMove(UserGameCommand command, Session session) {
     }
 
     public void joinObserver(JoinObserver command, Session session) throws IOException, DataAccessException {
-        AuthData auth = null;
+        AuthData auth;
         try {
             auth = authDAO.verify(command.getAuthString());
         } catch (Throwable e) {
@@ -79,17 +87,8 @@ public class WebSocketHandler {
             return;
         }
 
-        var games = gameDao.listGames();
-        GameData gameToPrint = null;
-        for (var game : games) {
-            if (game.gameID() == command.getGameID()) {
-                gameToPrint = game;
-            }
-        }
-        if (gameToPrint == null) {
-            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Game does not exists")));
-            return;
-        }
+        GameData gameToPrint = getGameToPrint(command.getGameID(), session);
+        if (gameToPrint == null) return;
 
         connections.add(command.getAuthString(), command.getGameID(), session);
         var game = new LoadGameMessage(gameToPrint, ChessGame.TeamColor.WHITE);
@@ -102,32 +101,38 @@ public class WebSocketHandler {
         connections.broadcast(command.getAuthString(), jsonMessage);
     }
 
+    private GameData getGameToPrint(int gameID, Session session) throws DataAccessException, IOException {
+        var games = gameDao.listGames();
+        GameData gameToPrint = null;
+        for (var game : games) {
+            if (game.gameID() == gameID) {
+                gameToPrint = game;
+            }
+        }
+        if (gameToPrint == null) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Game does not exists")));
+            return null;
+        }
+        return gameToPrint;
+    }
+
     public void joinPlayer(JoinCommand command, Session session) throws IOException, DataAccessException {
-        AuthData auth = null;
+        AuthData auth;
         try {
             auth = authDAO.verify(command.getAuthString());
         } catch (Throwable e) {
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Not Authorized")));
             return;
         }
-        String teamColor = "";
+        String teamColor;
         if (command.getTeamColor() == ChessGame.TeamColor.WHITE) {
             teamColor = "White";
         } else {
             teamColor = "Black";
         }
 
-        var games = gameDao.listGames();
-        GameData gameToPrint = null;
-        for (var game : games) {
-            if (game.gameID() == command.getGameID()) {
-                gameToPrint = game;
-            }
-        }
-        if (gameToPrint == null) {
-            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Game does not exists")));
-            return;
-        }
+        GameData gameToPrint = getGameToPrint(command.getGameID(), session);
+        if (gameToPrint == null) return;
 
         boolean spotTaken = false;
         ErrorMessage error = null;
