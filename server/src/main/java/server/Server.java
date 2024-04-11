@@ -138,6 +138,12 @@ public class Server {
         return "{}";
     }
 
+    public void testClear() throws DataAccessException {
+        gameService.clear();
+        authService.clear();
+        userService.clear();
+    }
+
     /**
      * Registers a new user if one does not already exist with the given username
      * @param request .

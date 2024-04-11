@@ -2,6 +2,7 @@ package clientTests;
 
 import Exception.DataAccessException;
 import org.junit.jupiter.api.*;
+import server.Server;
 import ui.Client;
 
 
@@ -11,20 +12,23 @@ public class ServerFacadeTests {
     private static String userUrl;
     private static String loginUrl;
     private static String gameUrl;
+    private static Server server;
 
     @BeforeAll
     public static void init() throws DataAccessException {
         client = new Client();
-        client.clear();
+        server = new Server();
+        server.run(8080);
 
 
-        userUrl = "http://localhost:" + client.server.port() + "/user";
-        loginUrl = "http://localhost:" + client.server.port() + "/session";
-        gameUrl = "http://localhost:" + client.server.port() + "/game";
+        userUrl = "http://localhost:8080/user";
+        loginUrl = "http://localhost:8080/session";
+        gameUrl = "http://localhost:8080/game";
 
     }
     @BeforeEach
     public void setup() throws DataAccessException {
+        server.testClear();
         client.userRequests.register("test",
                 "test", "test@email.com", userUrl);
         client.logout();
@@ -32,13 +36,13 @@ public class ServerFacadeTests {
 
     @AfterEach
     public void resetDatabase() throws DataAccessException {
-        client.clear();
+        server.testClear();
     }
 
     @AfterAll
     static void stopServer() throws DataAccessException {
-        client.clear();
-        client.server.stop();
+        server.testClear();
+        server.stop();
     }
 
 
@@ -127,11 +131,6 @@ public class ServerFacadeTests {
         String authToken = client.userRequests.login("test", "test", loginUrl);
         client.gameRequests.createGame("test", authToken, gameUrl);
         Assertions.assertThrows(DataAccessException.class ,()->client.gameRequests.joinGame("badAuth", 1, null, gameUrl));
-    }
-
-    @Test
-    public void clear() {
-        Assertions.assertDoesNotThrow(()->client.clear());
     }
 
 }
