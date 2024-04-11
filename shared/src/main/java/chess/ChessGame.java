@@ -12,8 +12,18 @@ import java.util.HashSet;
  */
 public class ChessGame {
 
-    private TeamColor team;
+    private TeamColor team = TeamColor.WHITE;
     private ChessBoard board;
+
+    private boolean game_over = false;
+
+    public boolean isGame_over() {
+        return game_over;
+    }
+
+    public void setGame_over(boolean game_over) {
+        this.game_over = game_over;
+    }
 
     public ChessGame() {
         board = new ChessBoard();

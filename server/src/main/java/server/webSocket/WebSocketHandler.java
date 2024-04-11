@@ -2,6 +2,7 @@ package server.webSocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -57,7 +58,9 @@ public class WebSocketHandler {
                         gameID = jsonObject.get("gameID").getAsInt();
                         JsonObject moveObject = jsonObject.getAsJsonObject("move"); // Get the "move" JSON object
                         ChessMove chessMove = new Gson().fromJson(moveObject, ChessMove.class);
-                        MakeMoveCommand makeMoveCommand = new MakeMoveCommand(auth, chessMove, gameID);
+                        JsonObject teamColor = jsonObject.getAsJsonObject("playerColor");
+                        ChessGame.TeamColor playerColor = new Gson().fromJson(teamColor, ChessGame.TeamColor.class);
+                        MakeMoveCommand makeMoveCommand = new MakeMoveCommand(auth, chessMove, gameID, playerColor);
                         makeMove(makeMoveCommand, session);
                         break;
                     case LEAVE:
@@ -109,12 +112,49 @@ public class WebSocketHandler {
             return;
         }
 
+        game.game().setGame_over(true);
         connections.broadcast("", jsonMessage);
         connections.remove(command.getAuthString());
     }
 
-    public void makeMove(MakeMoveCommand command, Session session) {
+    public void makeMove(MakeMoveCommand command, Session session) throws IOException, DataAccessException, InvalidMoveException {
+        ChessMove move = command.getMove();
+        GameData game = getGameToPrint(command.getGameID(), session);
+        assert game != null;
 
+        if (game.game().isGame_over()) {
+            ErrorMessage errorMessage = new ErrorMessage("Game Over");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+        if (command.getPlayerColor() != game.game().getTeamTurn()) {
+            ErrorMessage errorMessage = new ErrorMessage("Not your turn");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+        if (command.getPlayerColor() != game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor()) {
+            ErrorMessage errorMessage = new ErrorMessage("Not your piece");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+        var validMoves = game.game().validMoves(move.getStartPosition());
+        if (validMoves.contains(move)) {
+                game.game().makeMove(move);
+        } else {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid move");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+
+        connections.broadcastMove(game);
+
+        NotificationMessage message = new NotificationMessage(String.format("Move made: %s, %s", move.getStartPosition(), move.getEndPosition()));
+        String jsonMessage = new Gson().toJson(message);
+        connections.broadcast(command.getAuthString(), jsonMessage);
     }
 
     public void joinObserver(JoinObserver command, Session session) throws IOException, DataAccessException {
