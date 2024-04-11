@@ -67,7 +67,8 @@ public class WebSocketHandler {
                         leave(leaveCommand, session);
                         break;
                     case RESIGN:
-                        ResignCommand resignCommand = new ResignCommand(auth);
+                        gameID = jsonObject.get("gameID").getAsInt();
+                        ResignCommand resignCommand = new ResignCommand(auth, gameID);
                         resign(resignCommand, session);
                         break;
                 }
@@ -94,14 +95,21 @@ public class WebSocketHandler {
         connections.remove(command.getAuthString());
     }
 
-    public void resign(ResignCommand command, Session session) throws DataAccessException {
+    public void resign(ResignCommand command, Session session) throws DataAccessException, IOException {
         AuthData auth = authDAO.verify(command.getAuthString());
         NotificationMessage notification = new NotificationMessage(String.format("%s has resigned from the game", auth.username()));
         String jsonMessage = new Gson().toJson(notification);
 
+        GameData game = getGameToPrint(command.getGameID(), session);
 
+        assert game != null;
+        if (!Objects.equals(auth.username(), game.blackUsername()) || !Objects.equals(auth.username(), game.whiteUsername())) {
+            ErrorMessage error = new ErrorMessage("An observer cannot resign.");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        }
 
-        connections.broadcast(command.getAuthString(), jsonMessage);
+        connections.broadcast("", jsonMessage);
         connections.remove(command.getAuthString());
     }
 
