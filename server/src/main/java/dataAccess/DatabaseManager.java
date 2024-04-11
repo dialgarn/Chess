@@ -2,6 +2,7 @@ package dataAccess;
 
 import java.sql.*;
 import java.util.Properties;
+import Exception.DataAccessException;
 
 public class DatabaseManager {
     private static final String databaseName;

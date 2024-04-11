@@ -6,6 +6,7 @@ import model.UserData;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
+import Exception.DataAccessException;
 
 public class MemoryAuthDAO implements AuthDAO {
     private final HashSet<AuthData> authList = new HashSet<>();
