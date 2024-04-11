@@ -39,7 +39,7 @@ public class Server {
         try {
             DatabaseManager.createDatabase();
             DatabaseManager.setupDatabase();
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             return 500;
         }
 
