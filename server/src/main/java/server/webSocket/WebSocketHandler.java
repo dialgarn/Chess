@@ -94,7 +94,7 @@ public class WebSocketHandler {
             gameDao.playerLeavesGame(game.gameID(), ChessGame.TeamColor.BLACK);
         }
 
-        connections.broadcast(command.getAuthString(), new Gson().toJson(notification));
+        connections.broadcast(command.getAuthString(), game.gameID(),new Gson().toJson(notification));
         connections.remove(command.getAuthString());
     }
 
@@ -119,7 +119,7 @@ public class WebSocketHandler {
 
         game.game().setGame_over(true);
         gameDao.updateChessGame(game.gameID(), game.game());
-        connections.broadcast("", jsonMessage);
+        connections.broadcast("", game.gameID(), jsonMessage);
         connections.remove(command.getAuthString());
     }
 
@@ -174,17 +174,17 @@ public class WebSocketHandler {
         if (whiteCheckMate) {
             game.game().setGame_over(true);
             NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.whiteUsername()));
-            connections.broadcast("", new Gson().toJson(checkmate));
+            connections.broadcast("", game.gameID(), new Gson().toJson(checkmate));
         } else if (blackCheckmate) {
             game.game().setGame_over(true);
             NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.blackUsername()));
-            connections.broadcast("", new Gson().toJson(checkmate));
+            connections.broadcast("", game.gameID(), new Gson().toJson(checkmate));
         } else if (whiteCheck) {
             NotificationMessage check = new NotificationMessage(String.format("%s is in check", game.whiteUsername()));
-            connections.broadcast("", new Gson().toJson(check));
+            connections.broadcast("", game.gameID(), new Gson().toJson(check));
         } else if (blackCheck) {
             NotificationMessage check = new NotificationMessage(String.format("%s is in check", game.blackUsername()));
-            connections.broadcast("", new Gson().toJson(check));
+            connections.broadcast("", game.gameID(), new Gson().toJson(check));
         }
 
         gameDao.updateChessGame(game.gameID(), game.game());
@@ -193,7 +193,7 @@ public class WebSocketHandler {
 
         NotificationMessage message = new NotificationMessage(String.format("Move made: %s, %s", move.getStartPosition(), move.getEndPosition()));
         String jsonMessage = new Gson().toJson(message);
-        connections.broadcast(command.getAuthString(), jsonMessage);
+        connections.broadcast(command.getAuthString(), game.gameID(),jsonMessage);
     }
 
     public void joinObserver(JoinObserver command, Session session) throws IOException, DataAccessException {
@@ -216,7 +216,7 @@ public class WebSocketHandler {
         var notification = new NotificationMessage(message);
         // Convert notification message to JSON
         String jsonMessage = new Gson().toJson(notification);
-        connections.broadcast(command.getAuthString(), jsonMessage);
+        connections.broadcast(command.getAuthString(), game.getGame().gameID(),jsonMessage);
     }
 
     private GameData getGameToPrint(int gameID, Session session) throws DataAccessException, IOException {
@@ -285,7 +285,7 @@ public class WebSocketHandler {
         var notification = new NotificationMessage(message);
         // Convert notification message to JSON
         String jsonMessage = new Gson().toJson(notification);
-        connections.broadcast(command.getAuthString(), jsonMessage);
+        connections.broadcast(command.getAuthString(), gameToPrint.gameID(), jsonMessage);
     }
 
 

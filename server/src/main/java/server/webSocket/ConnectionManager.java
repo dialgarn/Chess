@@ -25,27 +25,26 @@ public class ConnectionManager {
         games.remove(authToken);
     }
 
-    public void broadcast(String excludeAuthToken, String notification) {
-        var removeList = new ArrayList<String>(); // Use authToken for the removal list
+    public void broadcast(String excludeAuthToken, int gameID, String notification) {
+        var removeList = new ArrayList<String>();
 
         for (var entry : connections.entrySet()) {
             String authToken = entry.getKey();
             Connection c = entry.getValue();
             try {
-                Integer gameID = games.get(authToken); // Retrieve gameID directly using authToken
-                if (gameID != null && c.session.isOpen() && !authToken.equals(excludeAuthToken)) {
-                    c.send(notification); // Send notification if criteria met
+                Integer clientGameId = games.get(authToken);
+                if (clientGameId != null && clientGameId.equals(gameID) && c.session.isOpen() && !authToken.equals(excludeAuthToken)) {
+                    c.send(notification);
                 } else if (!c.session.isOpen()) {
-                    removeList.add(authToken); // Mark for removal if session is closed
+                    removeList.add(authToken);
                 }
             } catch (IOException e) {
                 System.err.println("Error broadcasting message to " + authToken + ": " + e.getMessage());
-                removeList.add(authToken); // Optionally mark for removal on IOException
+                removeList.add(authToken);
             }
         }
 
-        // Clean up connections marked for removal
-        removeList.forEach(this::remove); // Use ConnectionManager's remove method for cleanup
+        removeList.forEach(this::remove);
     }
 
     public void broadcastMove(GameData game) {
