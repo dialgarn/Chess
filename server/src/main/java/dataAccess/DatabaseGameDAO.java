@@ -40,6 +40,8 @@ public class DatabaseGameDAO implements GameDAO {
     @Override
     public void joinGame(int gameID, ChessGame.TeamColor playerColor, String playerName) throws DataAccessException {
         try (Connection c = DatabaseManager.getConnection()) {
+
+
             String getUsername = "SELECT user_id FROM users WHERE username = ?";
             try (PreparedStatement stmt = c.prepareStatement(getUsername)) {
                 stmt.setString(1, playerName);

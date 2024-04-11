@@ -96,4 +96,34 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void joinObserver(String authToken, int gameID) {
+        try {
+            var command = new JoinObserver(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            boolean messageReceived = messageLatch.await(3, TimeUnit.SECONDS); // Adjust timeout as needed
+            if (!messageReceived) {
+                System.out.println("Timeout waiting for message.");
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            messageLatch = new CountDownLatch(1);
+        }
+    }
+
+    public void leave(String authToken, int gameID) {
+        try {
+            var command = new LeaveCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            boolean messageReceived = messageLatch.await(3, TimeUnit.SECONDS); // Adjust timeout as needed
+            if (!messageReceived) {
+                System.out.println("Timeout waiting for message.");
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            messageLatch = new CountDownLatch(1);
+        }
+    }
+
 }

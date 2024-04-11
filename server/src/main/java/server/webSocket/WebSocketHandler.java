@@ -1,6 +1,7 @@
 package server.webSocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,12 +16,10 @@ import org.eclipse.jetty.websocket.api.*;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
-import webSocketMessages.userCommands.JoinCommand;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.LeaveCommand;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @WebSocket
 public class WebSocketHandler {
@@ -55,12 +54,22 @@ public class WebSocketHandler {
                         break;
                     case MAKE_MOVE:
                         // Handle make move command
-                        makeMove(command, session);
+                        gameID = jsonObject.get("gameID").getAsInt();
+                        JsonObject moveObject = jsonObject.getAsJsonObject("move"); // Get the "move" JSON object
+                        ChessMove chessMove = new Gson().fromJson(moveObject, ChessMove.class);
+                        MakeMoveCommand makeMoveCommand = new MakeMoveCommand(auth, chessMove, gameID);
+                        makeMove(makeMoveCommand, session);
                         break;
                     case LEAVE:
                         // Handle leave command
-                        LeaveCommand leaveCommand = new LeaveCommand(auth);
+                        gameID = jsonObject.get("gameID").getAsInt();
+                        LeaveCommand leaveCommand = new LeaveCommand(auth, gameID);
                         leave(leaveCommand, session);
+                        break;
+                    case RESIGN:
+                        ResignCommand resignCommand = new ResignCommand(auth);
+                        resign(resignCommand, session);
+                        break;
                 }
         } catch (Exception e) {
             // Handle exceptions
@@ -68,14 +77,36 @@ public class WebSocketHandler {
         }
     }
 
-    public void leave(LeaveCommand command, Session session) throws IOException, DataAccessException {
+    public void leave(LeaveCommand command, Session session) throws DataAccessException, IOException {
         AuthData auth = authDAO.verify(command.getAuthString());
         NotificationMessage notification = new NotificationMessage(String.format("%s left the game", auth.username()));
+
+        GameData game = getGameToPrint(command.getGameID(), session);
+
+        assert game != null;
+//        if (game.whiteUsername() != null && Objects.equals(auth.username(), game.whiteUsername())) {
+//            gameDao.joinGame(game.gameID(), ChessGame.TeamColor.WHITE, "");
+//        } else if (game.blackUsername() != null && Objects.equals(auth.username(), game.blackUsername())) {
+//            gameDao.joinGame(game.gameID(), ChessGame.TeamColor.BLACK, "");
+//        }
+
         connections.broadcast(command.getAuthString(), new Gson().toJson(notification));
         connections.remove(command.getAuthString());
     }
 
-    public void makeMove(UserGameCommand command, Session session) {
+    public void resign(ResignCommand command, Session session) throws DataAccessException {
+        AuthData auth = authDAO.verify(command.getAuthString());
+        NotificationMessage notification = new NotificationMessage(String.format("%s has resigned from the game", auth.username()));
+        String jsonMessage = new Gson().toJson(notification);
+
+
+
+        connections.broadcast(command.getAuthString(), jsonMessage);
+        connections.remove(command.getAuthString());
+    }
+
+    public void makeMove(MakeMoveCommand command, Session session) {
+
     }
 
     public void joinObserver(JoinObserver command, Session session) throws IOException, DataAccessException {

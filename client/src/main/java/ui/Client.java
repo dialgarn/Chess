@@ -14,7 +14,10 @@ import java.util.Scanner;
 
 public class Client {
     private boolean logged_in = false;
+    private boolean in_game = false;
+    private boolean able_to_move = false;
     String authToken = "";
+    int currentGameID = 0;
     public final Server server;
     public final UserRequests userRequests = new UserRequests();
 
@@ -43,16 +46,21 @@ public class Client {
 
         label:
         while (true) {
-            if (!logged_in) {
-                System.out.print("\r[LOGGED_OUT] >>> ");
+            if (in_game) {
+                System.out.print("\r[IN_GAME} >>> ");
             } else {
-                System.out.print("\r[LOGGED_IN] >>> ");
+                if (!logged_in) {
+                    System.out.print("\r[LOGGED_OUT] >>> ");
+                } else {
+                    System.out.print("\r[LOGGED_IN] >>> ");
+                }
             }
             String input = scanner.nextLine();
             String[] tokens = input.split("\\s+");
 
             if (tokens.length > 0) {
                 String command = tokens[0];
+                int gameID;
                 switch (command) {
                     case "help":
                         printHelp();
@@ -116,7 +124,14 @@ public class Client {
                         }
                         break;
                     case "join":
-                        int gameID = Integer.parseInt(tokens[1]);
+                        if (tokens.length == 2) {
+                            gameID = Integer.parseInt(tokens[1]);
+                            observe(gameID);
+                            in_game = true;
+                            currentGameID = gameID;
+                            break;
+                        }
+                        gameID = Integer.parseInt(tokens[1]);
                         String teamColor = tokens[2];
                         teamColor = teamColor.toUpperCase();
                         try {
@@ -135,16 +150,26 @@ public class Client {
                                 }
                                 // You might want to reset the callback here or set a flag that the message has been received
                             });
-
+                            currentGameID = gameID;
                             ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
+                        in_game = true;
+                        able_to_move = true;
                         break;
                     case "observe":
                         gameID = Integer.parseInt(tokens[1]);
+                        observe(gameID);
+                        in_game = true;
+                        currentGameID = gameID;
+                        break;
+                    case "leave":
                         try {
-                            gameRequests.joinGame(authToken, gameID, null, gameUrl);
+                            ws = new WebSocketFacade(serverURL);
+                            ws.leave(authToken, currentGameID);
+                            able_to_move = false;
+                            in_game = false;
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
@@ -162,21 +187,48 @@ public class Client {
         server.stop();
     }
 
+    private void observe(int gameID) {
+        try {
+            gameRequests.joinGame(authToken, gameID, null, gameUrl);
+            ws = new WebSocketFacade(serverURL);
+
+            ws.setMessageReceivedCallback(message -> {
+                if (message instanceof LoadGameMessage loadGameMessage) {
+                    GameData game = loadGameMessage.getGame();
+                    System.out.println(game.game().getBoard().realToStringWhite());
+                }
+            });
+
+            ws.joinObserver(authToken, gameID);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
 
     private void printHelp() {
-        if (!logged_in) {
-            System.out.println("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
-            System.out.println("   login <USERNAME> <PASSWORD> - to play chess");
-            System.out.println("   quit - playing chess");
+        if (in_game) {
+            System.out.println("   redraw - the chessboard");
+            System.out.println("   move - make a move");
+            System.out.println("   highlight - legal moves");
+            System.out.println("   leave - the match");
+            System.out.println("   resign - forfeit the match");
             System.out.println("   help - with possible commands");
         } else {
-            System.out.println("   create <NAME> - a game");
-            System.out.println("   list - games");
-            System.out.println("   join <ID> [WHITE|BLACK|<empty>] - a game");
-            System.out.println("   observe <ID> - a game");
-            System.out.println("   logout - when you are done");
-            System.out.println("   quit - playing chess");
-            System.out.println("   help - with possible commands");
+            if (!logged_in) {
+                System.out.println("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
+                System.out.println("   login <USERNAME> <PASSWORD> - to play chess");
+                System.out.println("   quit - playing chess");
+                System.out.println("   help - with possible commands");
+            } else {
+                System.out.println("   create <NAME> - a game");
+                System.out.println("   list - games");
+                System.out.println("   join <ID> [WHITE|BLACK|<empty>] - a game");
+                System.out.println("   observe <ID> - a game");
+                System.out.println("   logout - when you are done");
+                System.out.println("   quit - playing chess");
+                System.out.println("   help - with possible commands");
+            }
         }
     }
 
