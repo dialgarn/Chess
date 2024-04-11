@@ -21,6 +21,8 @@ public class WebSocketFacade extends Endpoint {
     NotificationHandler notificationHandler;
     private CountDownLatch messageLatch;
 
+    private ChessGame.TeamColor playerColor;
+
     public interface MessageReceivedCallback {
         void onMessageReceived(ServerMessage message);
     }
@@ -55,7 +57,7 @@ public class WebSocketFacade extends Endpoint {
                             LoadGameMessage notif = new Gson().fromJson(message, LoadGameMessage.class);
                             GameData game = notif.getGame();
                             var teamColor = notif.getTeamColor();
-                            if (teamColor == ChessGame.TeamColor.WHITE) {
+                            if (teamColor == ChessGame.TeamColor.WHITE || playerColor == ChessGame.TeamColor.WHITE) {
                                 System.out.println(game.game().getBoard().realToStringWhite());
                             } else {
                                 System.out.println(game.game().getBoard().realToStringBlack());
@@ -63,7 +65,7 @@ public class WebSocketFacade extends Endpoint {
                             break;
                         case ERROR:
                             ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-                            System.out.println(errorMessage);
+                            System.out.println(errorMessage.getMessage());
                         case NOTIFICATION:
                             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
                             System.out.println(notificationMessage.getMessage());
@@ -89,7 +91,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new JoinCommand(authToken, teamColor, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
-            boolean messageReceived = messageLatch.await(3, TimeUnit.SECONDS); // Adjust timeout as needed
+            boolean messageReceived = messageLatch.await(2, TimeUnit.SECONDS); // Adjust timeout as needed
             if (!messageReceived) {
                 System.out.println("Timeout waiting for message.");
             }
@@ -104,7 +106,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new JoinObserver(authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
-            boolean messageReceived = messageLatch.await(3, TimeUnit.SECONDS); // Adjust timeout as needed
+            boolean messageReceived = messageLatch.await(2, TimeUnit.SECONDS); // Adjust timeout as needed
             if (!messageReceived) {
                 System.out.println("Timeout waiting for message.");
             }
@@ -143,15 +145,16 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new MakeMoveCommand(authToken, move, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
-            boolean messageReceived = messageLatch.await(3, TimeUnit.SECONDS); // Adjust timeout as needed
-            if (!messageReceived) {
-                System.out.println("Timeout waiting for message.");
-            }
+            messageLatch.await(1, TimeUnit.SECONDS); // Adjust timeout as needed
         } catch (Throwable e) {
             throw new RuntimeException(e);
         } finally {
             messageLatch = new CountDownLatch(1);
         }
+    }
+
+    public void setPlayerColor(ChessGame.TeamColor color) {
+        this.playerColor = color;
     }
 
 }

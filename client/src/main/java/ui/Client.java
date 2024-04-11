@@ -180,6 +180,7 @@ public class Client {
                             in_game = true;
                             able_to_move = true;
                             playerColor = ChessGame.TeamColor.valueOf(teamColor);
+                            ws.setPlayerColor(playerColor);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
@@ -268,6 +269,19 @@ public class Client {
 
                             ChessMove move = new ChessMove(startPosition, endPosition, promotion);
                             ws = new WebSocketFacade(serverURL);
+
+                            ws.setMessageReceivedCallback(message -> {
+                                if (message instanceof LoadGameMessage loadGameMessage) {
+                                    GameData game = loadGameMessage.getGame();
+                                    var color = loadGameMessage.getTeamColor();
+                                    if (playerColor == ChessGame.TeamColor.WHITE) {
+                                        System.out.println(game.game().getBoard().realToStringWhite());
+                                    } else {
+                                        System.out.println(game.game().getBoard().realToStringBlack());
+                                    }
+                                }
+                                // You might want to reset the callback here or set a flag that the message has been received
+                            });
                             ws.move(authToken, move, currentGameID);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());

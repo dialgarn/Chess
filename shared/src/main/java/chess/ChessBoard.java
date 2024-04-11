@@ -133,67 +133,49 @@ public class ChessBoard implements Cloneable {
         board = new ChessPiece[8][8];
     }
 
+    public String realToStringWhite() {
+        StringBuilder output = new StringBuilder();
+        output.append("     a     b     c     d     e     f     g     h\n");
+        output.append("  +-----------------------------------------------+\n");
+
+        for (int i = 8; i >= 1; i--) {
+            output.append(i).append(" |");
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = getPiece(position);
+                String pieceRepresentation = piece == null ? "     " : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " ";
+                output.append(pieceRepresentation).append("|");
+            }
+            output.append(" ").append(i).append("\n");
+        }
+
+        output.append("  +-----------------------------------------------+\n");
+        output.append("     a     b     c     d     e     f     g     h\n");
+        return output.toString();
+    }
+
+
     public String realToStringBlack() {
         StringBuilder output = new StringBuilder();
         output.append("     h     g     f     e     d     c     b     a\n");
-        // Add top border
         output.append("  +-----------------------------------------------+\n");
 
-        // Add rows with pieces
-        // Print the board with white at the bottom
-        for (int i = 7; i >= 0; i--) {
-            // Add row label
-            output.append(8 - i).append(" |");
-
-            for (int j = 0; j < 8; j++) {
-                ChessPosition pieceLocation = new ChessPosition(i + 1, j + 1);
-                ChessPiece piece = getPiece(pieceLocation);
-                output.append(piece == null ? "     |" : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " |");
+        for (int i = 1; i <= 8; i++) {
+            output.append(i).append(" |");
+            for (int j = 8; j >= 1; j--) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = getPiece(position);
+                String pieceRepresentation = piece == null ? "     " : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " ";
+                output.append(pieceRepresentation).append("|");
             }
-
-            // Add row label again at the end of the row
-            output.append(" ").append(8 - i).append("\n");
+            output.append(" ").append(i).append("\n");
         }
 
-        // Add bottom border
         output.append("  +-----------------------------------------------+\n");
-
-        // Add column labels
         output.append("     h     g     f     e     d     c     b     a\n");
-
         return output.toString();
     }
 
-    public String realToStringWhite() {
-        StringBuilder output = new StringBuilder();
-        // Add column labels
-        output.append("     a     b     c     d     e     f     g     h\n");
-        // Add top border
-        output.append("  +-----------------------------------------------+\n");
-
-        // Print the board with black at the bottom
-        for (int i = 0; i < 8; i++) {
-            // Add row label
-            output.append(8 - i).append(" |");
-
-            for (int j = 7; j >= 0; j--) {
-                ChessPosition pieceLocation = new ChessPosition(i + 1, j + 1);
-                ChessPiece piece = getPiece(pieceLocation);
-                output.append(piece == null ? "     |" : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " |");
-            }
-
-            // Add row label again at the end of the row
-            output.append(" ").append(8 - i).append("\n");
-        }
-
-        // Add bottom border
-        output.append("  +-----------------------------------------------+\n");
-
-        // Add column labels
-        output.append("     a     b     c     d     e     f     g     h\n");
-
-        return output.toString();
-    }
 
 
     @Override
