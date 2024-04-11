@@ -2,6 +2,7 @@ package dataAccess;
 
 import model.AuthData;
 import model.UserData;
+import Exception.DataAccessException;
 
 import java.sql.*;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public class DatabaseAuthDAO implements AuthDAO {
             try (Statement stmt = c.createStatement()) {
                 stmt.executeUpdate(resetAutoIncrement);
             }
-        } catch (DataAccessException | SQLException e) {
+        } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
     }

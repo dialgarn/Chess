@@ -2,6 +2,7 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
+import Exception.DataAccessException;
 
 import java.util.Collection;
 

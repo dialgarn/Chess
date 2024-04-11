@@ -2,6 +2,7 @@ package dataAccess;
 
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import Exception.DataAccessException;
 
 import java.sql.*;
 
@@ -70,7 +71,7 @@ public class DatabaseUserDAO implements UserDAO {
             try (Statement stmt = c.createStatement()) {
                 stmt.executeUpdate(resetAutoIncrement);
             }
-        } catch (DataAccessException | SQLException e) {
+        } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
     }

@@ -1,5 +1,5 @@
 package dataAccess;
-
+import Exception.DataAccessException;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
@@ -208,7 +208,7 @@ public class DatabaseGameDAO implements GameDAO {
             try (Statement stmt = c.createStatement()) {
                 stmt.executeUpdate(resetAutoIncrement);
             }
-        } catch (DataAccessException | SQLException e) {
+        } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
     }
