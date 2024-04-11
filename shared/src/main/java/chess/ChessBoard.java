@@ -141,10 +141,7 @@ public class ChessBoard implements Cloneable {
         for (int i = 8; i >= 1; i--) {
             output.append(i).append(" |");
             for (int j = 1; j <= 8; j++) {
-                ChessPosition position = new ChessPosition(i, j);
-                ChessPiece piece = getPiece(position);
-                String pieceRepresentation = piece == null ? "     " : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " ";
-                output.append(pieceRepresentation).append("|");
+                printBoard(i, j, output);
             }
             output.append(" ").append(i).append("\n");
         }
@@ -152,6 +149,13 @@ public class ChessBoard implements Cloneable {
         output.append("  +-----------------------------------------------+\n");
         output.append("     a     b     c     d     e     f     g     h\n");
         return output.toString();
+    }
+
+    private void printBoard(int i, int j, StringBuilder output) {
+        ChessPosition position = new ChessPosition(i, j);
+        ChessPiece piece = getPiece(position);
+        String pieceRepresentation = piece == null ? "     " : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " ";
+        output.append(pieceRepresentation).append("|");
     }
 
 
@@ -163,10 +167,7 @@ public class ChessBoard implements Cloneable {
         for (int i = 1; i <= 8; i++) {
             output.append(i).append(" |");
             for (int j = 8; j >= 1; j--) {
-                ChessPosition position = new ChessPosition(i, j);
-                ChessPiece piece = getPiece(position);
-                String pieceRepresentation = piece == null ? "     " : " " + pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType()) + " ";
-                output.append(pieceRepresentation).append("|");
+                printBoard(i, j, output);
             }
             output.append(" ").append(i).append("\n");
         }

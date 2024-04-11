@@ -211,9 +211,4 @@ public class ChessGame {
         return this.board;
     }
 
-//    @Override
-//    public String toString() {
-//        return this.board.toString();
-//    }
-
 }

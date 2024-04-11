@@ -83,98 +83,22 @@ public class Client {
                         printHelp();
                         break;
                     case "login":
-                        if (tokens.length != 3) {
-                            System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD>");
-                        } else {
-                            String username = tokens[1];
-                            String password = tokens[2];
-                            try {
-                                authToken = userRequests.login(username, password, sessionUrl);
-                                loggedIn = true;
-                            } catch (Throwable e) {
-                                System.out.println(e.getMessage());
-                            }
-                        }
+                        login(tokens);
                         break;
                     case "register":
-                        if (tokens.length != 4) {
-                            System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>");
-                        } else {
-                            String username = tokens[1];
-                            String password = tokens[2];
-                            String email = tokens[3];
-                            try {
-                                authToken = userRequests.register(username, password, email, userUrl);
-                                loggedIn = true;
-                            } catch (Throwable e) {
-                                System.out.println(e.getMessage());
-                            }
-                        }
+                        register(tokens);
                         break;
                     case "logout":
                         logout();
                         break;
                     case "create":
-                        if (tokens.length != 2) {
-                            System.out.println("Invalid number of arguments. Usage: create <NAME>");
-                        } else {
-                            String gameName = tokens[1];
-                            try {
-                                gameRequests.createGame(gameName, authToken, gameUrl);
-                            } catch (Throwable e) {
-                                System.out.println(e.getMessage());
-                            }
-                        }
+                        create(tokens);
                         break;
                     case "list":
-                        try {
-                            ArrayList<GameData> games = (ArrayList<GameData>) gameRequests.getGames(authToken, gameUrl);
-                            if (!games.isEmpty()) {
-                                for (var game : games) {
-                                    System.out.println(game);
-                                }
-                            } else {
-                                System.out.println("There are no games to list.");
-                            }
-                        } catch (Throwable e) {
-                            System.out.println(e.getMessage());
-                        }
+                        list();
                         break;
                     case "join":
-                        if (tokens.length == 2) {
-                            gameID = Integer.parseInt(tokens[1]);
-                            observe(gameID);
-                            inGame = true;
-                            currentGameID = gameID;
-                            break;
-                        }
-                        gameID = Integer.parseInt(tokens[1]);
-                        String teamColor = tokens[2];
-                        teamColor = teamColor.toUpperCase();
-                        try {
-                            gameRequests.joinGame(authToken, gameID, teamColor, gameUrl);
-                            ws = new WebSocketFacade(serverURL);
-
-                            ws.setMessageReceivedCallback(message -> {
-                                if (message instanceof LoadGameMessage loadGameMessage) {
-                                    GameData game = loadGameMessage.getGame();
-                                    var color = loadGameMessage.getTeamColor();
-                                    if (color == ChessGame.TeamColor.WHITE) {
-                                        System.out.println(game.game().getBoard().realToStringWhite());
-                                    } else {
-                                        System.out.println(game.game().getBoard().realToStringBlack());
-                                    }
-                                }
-                                // You might want to reset the callback here or set a flag that the message has been received
-                            });
-                            currentGameID = gameID;
-                            ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
-                            inGame = true;
-                            playerColor = ChessGame.TeamColor.valueOf(teamColor);
-                            ws.setPlayerColor(playerColor);
-                        } catch (Throwable e) {
-                            System.out.println(e.getMessage());
-                        }
+                        join(tokens);
                         break;
                     case "observe":
                         gameID = Integer.parseInt(tokens[1]);
@@ -184,84 +108,16 @@ public class Client {
                         playerColor = ChessGame.TeamColor.WHITE;
                         break;
                     case "leave":
-                        try {
-                            ws = new WebSocketFacade(serverURL);
-                            ws.leave(authToken, currentGameID);
-                            inGame = false;
-                        } catch (Throwable e) {
-                            System.out.println(e.getMessage());
-                        }
+                        leave();
                         break;
                     case "resign":
-                        try {
-                            ws = new WebSocketFacade(serverURL);
-                            ws.resign(authToken, currentGameID);
-
-                            ws.setMessageReceivedCallback(message -> {
-                                if (message instanceof NotificationMessage notificationMessage) {
-                                    System.out.println(notificationMessage.getMessage());
-                                }
-                                // You might want to reset the callback here or set a flag that the message has been received
-                            });
-
-                            inGame = false;
-                        } catch (Throwable e) {
-                            System.out.println(e.getMessage());
-                        }
+                        resign();
                         break;
                     case "redraw":
-                        try {
-                            var game = gameRequests.getGame(authToken, currentGameID, gameUrl);
-                            if (playerColor == ChessGame.TeamColor.WHITE) {
-                                System.out.println(game.game().getBoard().realToStringWhite());
-                            } else {
-                                System.out.println(game.game().getBoard().realToStringBlack());
-                            }
-                        } catch (Throwable e) {
-                            System.out.println(e.getMessage());
-                        }
+                        redraw();
                         break;
                     case "move":
-                        String start, end, promotionString;
-                        if (tokens.length == 4) {
-                            start = tokens[1];
-                            end = tokens[2];
-                            promotionString = tokens[3];
-                        } else if (tokens.length == 3) {
-                            start = tokens[1];
-                            end = tokens[2];
-                            promotionString = null;
-                        } else {
-                            System.out.println("Invalid number of arguments. Usage: move <START> <END> [<PROMOTION_PIECE>|<empty>]");
-                            break;
-                        }
-
-                        try {
-                            int rowNumber = Integer.parseInt(start.substring(1));
-
-                            // Map the column letter to a column number
-                            String columnLetter = String.valueOf(start.charAt(0));
-                            Integer columnNumber = letters.get(columnLetter.toLowerCase());
-                            ChessPosition startPosition = new ChessPosition(rowNumber, columnNumber);
-
-                            rowNumber = Integer.parseInt(end.substring(1));
-
-                            // Map the column letter to a column number
-                            columnLetter = String.valueOf(end.charAt(0));
-                            columnNumber = letters.get(columnLetter.toLowerCase());
-                            ChessPosition endPosition = new ChessPosition(rowNumber, columnNumber);
-
-                            ChessPiece.PieceType promotion = null;
-                            if (promotionString != null) {
-                                promotion = pieceTypeMap.get(promotionString.toLowerCase());
-                            }
-
-                            ChessMove move = new ChessMove(startPosition, endPosition, promotion);
-                            ws = new WebSocketFacade(serverURL);
-                            ws.move(authToken, move, currentGameID);
-                        } catch (Throwable e) {
-                            System.out.println(e.getMessage());
-                        }
+                        move(tokens);
                         break;
                     case "quit":
                         if (loggedIn) {
@@ -271,6 +127,187 @@ public class Client {
                 }
             }
 
+        }
+    }
+
+    private void login(String[] tokens) {
+        if (tokens.length != 3) {
+            System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD>");
+        } else {
+            String username = tokens[1];
+            String password = tokens[2];
+            try {
+                authToken = userRequests.login(username, password, sessionUrl);
+                loggedIn = true;
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void register(String[] tokens) {
+        if (tokens.length != 4) {
+            System.out.println("Invalid number of arguments. Usage: register <USERNAME> <PASSWORD> <EMAIL>");
+        } else {
+            String username = tokens[1];
+            String password = tokens[2];
+            String email = tokens[3];
+            try {
+                authToken = userRequests.register(username, password, email, userUrl);
+                loggedIn = true;
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void create(String[] tokens) {
+        if (tokens.length != 2) {
+            System.out.println("Invalid number of arguments. Usage: create <NAME>");
+        } else {
+            String gameName = tokens[1];
+            try {
+                gameRequests.createGame(gameName, authToken, gameUrl);
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void list() {
+        try {
+            ArrayList<GameData> games = (ArrayList<GameData>) gameRequests.getGames(authToken, gameUrl);
+            if (!games.isEmpty()) {
+                for (var game : games) {
+                    System.out.println(game);
+                }
+            } else {
+                System.out.println("There are no games to list.");
+            }
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void join(String[] tokens) {
+        int gameID;
+        if (tokens.length == 2) {
+            gameID = Integer.parseInt(tokens[1]);
+            observe(gameID);
+            inGame = true;
+            currentGameID = gameID;
+            return;
+        }
+        gameID = Integer.parseInt(tokens[1]);
+        String teamColor = tokens[2];
+        teamColor = teamColor.toUpperCase();
+        try {
+            gameRequests.joinGame(authToken, gameID, teamColor, gameUrl);
+            ws = new WebSocketFacade(serverURL);
+
+            ws.setMessageReceivedCallback(message -> {
+                if (message instanceof LoadGameMessage loadGameMessage) {
+                    GameData game = loadGameMessage.getGame();
+                    var color = loadGameMessage.getTeamColor();
+                    if (color == ChessGame.TeamColor.WHITE) {
+                        System.out.println(game.game().getBoard().realToStringWhite());
+                    } else {
+                        System.out.println(game.game().getBoard().realToStringBlack());
+                    }
+                }
+                // You might want to reset the callback here or set a flag that the message has been received
+            });
+            currentGameID = gameID;
+            ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
+            inGame = true;
+            playerColor = ChessGame.TeamColor.valueOf(teamColor);
+            ws.setPlayerColor(playerColor);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void leave() {
+        try {
+            ws = new WebSocketFacade(serverURL);
+            ws.leave(authToken, currentGameID);
+            inGame = false;
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void resign() {
+        try {
+            ws = new WebSocketFacade(serverURL);
+            ws.resign(authToken, currentGameID);
+
+            ws.setMessageReceivedCallback(message -> {
+                if (message instanceof NotificationMessage notificationMessage) {
+                    System.out.println(notificationMessage.getMessage());
+                }
+                // You might want to reset the callback here or set a flag that the message has been received
+            });
+
+            inGame = false;
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void redraw() {
+        try {
+            var game = gameRequests.getGame(authToken, currentGameID, gameUrl);
+            if (playerColor == ChessGame.TeamColor.WHITE) {
+                System.out.println(game.game().getBoard().realToStringWhite());
+            } else {
+                System.out.println(game.game().getBoard().realToStringBlack());
+            }
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void move(String[] tokens) {
+        String start, end, promotionString;
+        if (tokens.length == 4) {
+            start = tokens[1];
+            end = tokens[2];
+            promotionString = tokens[3];
+        } else if (tokens.length == 3) {
+            start = tokens[1];
+            end = tokens[2];
+            promotionString = null;
+        } else {
+            System.out.println("Invalid number of arguments. Usage: move <START> <END> [<PROMOTION_PIECE>|<empty>]");
+            return;
+        }
+
+        try {
+            int rowNumber = Integer.parseInt(start.substring(1));
+
+            // Map the column letter to a column number
+            String columnLetter = String.valueOf(start.charAt(0));
+            Integer columnNumber = letters.get(columnLetter.toLowerCase());
+            ChessPosition startPosition = new ChessPosition(rowNumber, columnNumber);
+
+            rowNumber = Integer.parseInt(end.substring(1));
+
+            // Map the column letter to a column number
+            columnLetter = String.valueOf(end.charAt(0));
+            columnNumber = letters.get(columnLetter.toLowerCase());
+            ChessPosition endPosition = new ChessPosition(rowNumber, columnNumber);
+
+            ChessPiece.PieceType promotion = null;
+            if (promotionString != null) {
+                promotion = pieceTypeMap.get(promotionString.toLowerCase());
+            }
+
+            ChessMove move = new ChessMove(startPosition, endPosition, promotion);
+            ws = new WebSocketFacade(serverURL);
+            ws.move(authToken, move, currentGameID);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
         }
     }
 
