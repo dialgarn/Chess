@@ -1,6 +1,7 @@
 package ui.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import model.GameData;
 import webSocketMessages.userCommands.*;
@@ -63,6 +64,9 @@ public class WebSocketFacade extends Endpoint {
                         case ERROR:
                             ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
                             System.out.println(errorMessage);
+                        case NOTIFICATION:
+                            NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+                            System.out.println(notificationMessage.getMessage());
                     }
 
                     messageLatch.countDown();
@@ -115,11 +119,35 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new LeaveCommand(authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            messageLatch.await(1, TimeUnit.SECONDS); // Adjust timeout as needed
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            messageLatch = new CountDownLatch(1);
+        }
+    }
+
+    public void resign(String authToken, int gameID) {
+        try {
+            var command = new ResignCommand(authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            messageLatch.await(1, TimeUnit.SECONDS); // Adjust timeout as needed
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            messageLatch = new CountDownLatch(1);
+        }
+    }
+
+    public void move(String authToken, ChessMove move, int gameID) {
+        try {
+            var command = new MakeMoveCommand(authToken, move, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
             boolean messageReceived = messageLatch.await(3, TimeUnit.SECONDS); // Adjust timeout as needed
             if (!messageReceived) {
                 System.out.println("Timeout waiting for message.");
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         } finally {
             messageLatch = new CountDownLatch(1);

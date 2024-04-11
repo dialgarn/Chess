@@ -126,4 +126,18 @@ public class GameRequests {
         return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
 
+    public GameData getGame(String auth, int gameID, String url) throws DataAccessException {
+        var gameList = getGames(auth, url);
+        GameData gameToPrint = null;
+        for (var game : gameList) {
+            if (game.gameID() == gameID) {
+                gameToPrint = game;
+            }
+        }
+
+        assert gameToPrint != null;
+
+        return gameToPrint;
+    }
+
 }

@@ -159,7 +159,7 @@ public class ChessBoard implements Cloneable {
         output.append("  +-----------------------------------------------+\n");
 
         // Add column labels
-        output.append("     h     g     f     e     d     c     b     a\n\n\n");
+        output.append("     h     g     f     e     d     c     b     a\n");
 
         return output.toString();
     }

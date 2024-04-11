@@ -1,6 +1,9 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import dataAccess.DataAccessException;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -8,14 +11,17 @@ import server.Server;
 import server.webSocket.WebSocketHandler;
 import ui.websocket.WebSocketFacade;
 import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.NotificationMessage;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
     private boolean logged_in = false;
     private boolean in_game = false;
     private boolean able_to_move = false;
+    private ChessGame.TeamColor playerColor;
     String authToken = "";
     int currentGameID = 0;
     public final Server server;
@@ -28,6 +34,25 @@ public class Client {
     private WebSocketFacade ws;
     private final String serverURL;
 
+    private final Map<String, Integer> letters = Map.of(
+            "a" , 1,
+            "b", 2,
+            "c", 3,
+            "d", 4,
+            "e", 5,
+            "f", 6,
+            "g", 7,
+            "h", 8
+        );
+
+    private static final Map<String, ChessPiece.PieceType> pieceTypeMap = Map.of(
+            "king", ChessPiece.PieceType.KING,
+            "queen", ChessPiece.PieceType.QUEEN,
+            "bishop", ChessPiece.PieceType.BISHOP,
+            "knight", ChessPiece.PieceType.KNIGHT,
+            "rook", ChessPiece.PieceType.ROOK,
+            "pawn", ChessPiece.PieceType.PAWN
+    );
 
     public Client() {
         server = new Server();
@@ -152,17 +177,19 @@ public class Client {
                             });
                             currentGameID = gameID;
                             ws.joinPlayer(authToken, ChessGame.TeamColor.valueOf(teamColor), gameID);
+                            in_game = true;
+                            able_to_move = true;
+                            playerColor = ChessGame.TeamColor.valueOf(teamColor);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
-                        in_game = true;
-                        able_to_move = true;
                         break;
                     case "observe":
                         gameID = Integer.parseInt(tokens[1]);
                         observe(gameID);
                         in_game = true;
                         currentGameID = gameID;
+                        playerColor = ChessGame.TeamColor.WHITE;
                         break;
                     case "leave":
                         try {
@@ -170,6 +197,78 @@ public class Client {
                             ws.leave(authToken, currentGameID);
                             able_to_move = false;
                             in_game = false;
+                        } catch (Throwable e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "resign":
+                        try {
+                            ws = new WebSocketFacade(serverURL);
+                            ws.resign(authToken, currentGameID);
+
+                            ws.setMessageReceivedCallback(message -> {
+                                if (message instanceof NotificationMessage notificationMessage) {
+                                    System.out.println(notificationMessage.getMessage());
+                                }
+                                // You might want to reset the callback here or set a flag that the message has been received
+                            });
+
+                            able_to_move = false;
+                            in_game = false;
+                        } catch (Throwable e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "redraw":
+                        try {
+                            var game = gameRequests.getGame(authToken, currentGameID, gameUrl);
+                            if (playerColor == ChessGame.TeamColor.WHITE) {
+                                System.out.println(game.game().getBoard().realToStringWhite());
+                            } else {
+                                System.out.println(game.game().getBoard().realToStringBlack());
+                            }
+                        } catch (Throwable e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+                    case "move":
+                        String start, end, promotionString;
+                        if (tokens.length == 4) {
+                            start = tokens[1];
+                            end = tokens[2];
+                            promotionString = tokens[3];
+                        } else if (tokens.length == 3) {
+                            start = tokens[1];
+                            end = tokens[2];
+                            promotionString = null;
+                        } else {
+                            System.out.println("Invalid number of arguments. Usage: move <START> <END> [<PROMOTION_PIECE>|<empty>]");
+                            break;
+                        }
+
+                        try {
+                            int rowNumber = Integer.parseInt(start.substring(1));
+
+                            // Map the column letter to a column number
+                            String columnLetter = String.valueOf(start.charAt(0));
+                            Integer columnNumber = letters.get(columnLetter.toLowerCase());
+                            ChessPosition startPosition = new ChessPosition(rowNumber, columnNumber);
+
+                            rowNumber = Integer.parseInt(end.substring(1));
+
+                            // Map the column letter to a column number
+                            columnLetter = String.valueOf(end.charAt(0));
+                            columnNumber = letters.get(columnLetter.toLowerCase());
+                            ChessPosition endPosition = new ChessPosition(rowNumber, columnNumber);
+
+                            ChessPiece.PieceType promotion = null;
+                            if (promotionString != null) {
+                                promotion = pieceTypeMap.get(promotionString.toLowerCase());
+                            }
+
+                            ChessMove move = new ChessMove(startPosition, endPosition, promotion);
+                            ws = new WebSocketFacade(serverURL);
+                            ws.move(authToken, move, currentGameID);
                         } catch (Throwable e) {
                             System.out.println(e.getMessage());
                         }
@@ -209,7 +308,7 @@ public class Client {
     private void printHelp() {
         if (in_game) {
             System.out.println("   redraw - the chessboard");
-            System.out.println("   move - make a move");
+            System.out.println("   move <START> <END> [<PROMOTION_PIECE>|<empty>]- make a move");
             System.out.println("   highlight - legal moves");
             System.out.println("   leave - the match");
             System.out.println("   resign - forfeit the match");
