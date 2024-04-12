@@ -345,7 +345,7 @@ public class Client {
         if (inGame) {
             System.out.println("   redraw - the chessboard");
             System.out.println("   move <START> <END> [<PROMOTION_PIECE>|<empty>]- make a move");
-            System.out.println("   highlight - legal moves");
+            System.out.println("   highlight <PIECE> - legal moves");
             System.out.println("   leave - the match");
             System.out.println("   resign - forfeit the match");
             System.out.println("   help - with possible commands");

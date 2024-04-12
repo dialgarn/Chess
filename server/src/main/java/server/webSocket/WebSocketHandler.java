@@ -174,6 +174,25 @@ public class WebSocketHandler {
             return;
         }
 
+        gameDao.updateChessGame(game.gameID(), game.game());
+
+        connections.broadcastMove(game);
+
+
+        String start = letters.get(move.getStartPosition().getColumn()) + move.getStartPosition().getRow();
+        String end = letters.get(move.getEndPosition().getColumn()) + move.getEndPosition().getRow();
+
+        NotificationMessage message;
+        if (color == ChessGame.TeamColor.WHITE) {
+            message = new NotificationMessage(String.format("Move made by %s: %s, %s", game.whiteUsername(),
+                   start, end));
+        } else {
+            message = new NotificationMessage(String.format("Move made by %s: %s, %s", game.blackUsername(),
+                    start, end));
+        }
+
+        String jsonMessage = new Gson().toJson(message);
+        connections.broadcast(command.getAuthString(), game.gameID(),jsonMessage);
 
         boolean whiteCheck = game.game().isInCheck(ChessGame.TeamColor.WHITE);
         boolean blackCheck = game.game().isInCheck(ChessGame.TeamColor.BLACK);
@@ -195,26 +214,6 @@ public class WebSocketHandler {
             NotificationMessage check = new NotificationMessage(String.format("%s is in check by %s", game.blackUsername(), game.whiteUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(check));
         }
-
-        gameDao.updateChessGame(game.gameID(), game.game());
-
-        connections.broadcastMove(game);
-
-
-        String start = letters.get(move.getStartPosition().getColumn()) + move.getStartPosition().getRow();
-        String end = letters.get(move.getEndPosition().getColumn()) + move.getEndPosition().getRow();
-
-        NotificationMessage message;
-        if (color == ChessGame.TeamColor.WHITE) {
-            message = new NotificationMessage(String.format("Move made by %s: %s, %s", game.whiteUsername(),
-                   start, end));
-        } else {
-            message = new NotificationMessage(String.format("Move made by %s: %s, %s", game.blackUsername(),
-                    start, end));
-        }
-
-        String jsonMessage = new Gson().toJson(message);
-        connections.broadcast(command.getAuthString(), game.gameID(),jsonMessage);
     }
 
     public void joinObserver(JoinObserver command, Session session) throws IOException, DataAccessException {
