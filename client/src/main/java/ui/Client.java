@@ -119,6 +119,9 @@ public class Client {
                     case "move":
                         move(tokens);
                         break;
+                    case "highlight":
+                        highlight(tokens);
+                        break;
                     case "quit":
                         if (loggedIn) {
                             logout();
@@ -239,17 +242,25 @@ public class Client {
 
     private void resign() {
         try {
-            ws = new WebSocketFacade(serverURL);
-            ws.resign(authToken, currentGameID);
 
-            ws.setMessageReceivedCallback(message -> {
-                if (message instanceof NotificationMessage notificationMessage) {
-                    System.out.println(notificationMessage.getMessage());
-                }
-                // You might want to reset the callback here or set a flag that the message has been received
-            });
+            System.out.print("Are you sure? y/n : ");
+            Scanner scanner = new Scanner(System.in);
+            String input = scanner.nextLine();
+            String[] tokens = input.split("\\s+");
 
-            inGame = false;
+            String answer = tokens[0];
+            if (answer.equals("y")) {
+                ws = new WebSocketFacade(serverURL);
+                ws.resign(authToken, currentGameID);
+
+                ws.setMessageReceivedCallback(message -> {
+                    if (message instanceof NotificationMessage notificationMessage) {
+                        System.out.println(notificationMessage.getMessage());
+                    }
+                });
+
+                inGame = false;
+            }
         } catch (Throwable e) {
             System.out.println(e.getMessage());
         }
@@ -365,4 +376,29 @@ public class Client {
             System.out.println(e.getMessage());
         }
     }
+
+    public void highlight(String[] tokens) {
+        try {
+            String start = tokens[1];
+            var game = gameRequests.getGame(authToken, currentGameID, gameUrl);
+            int rowNumber = Integer.parseInt(start.substring(1));
+
+            // Map the column letter to a column number
+            String columnLetter = String.valueOf(start.charAt(0));
+            Integer columnNumber = letters.get(columnLetter.toLowerCase());
+            ChessPosition startPosition = new ChessPosition(rowNumber, columnNumber);
+
+            var validMoves = game.game().validMoves(startPosition);
+
+            if (playerColor == ChessGame.TeamColor.BLACK) {
+                System.out.println(game.game().getBoard().highlightMovesBlack(validMoves, startPosition));
+            } else {
+                System.out.println(game.game().getBoard().highlightMovesWhite(validMoves, startPosition));
+            }
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }
+
+

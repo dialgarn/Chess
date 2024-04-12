@@ -20,6 +20,7 @@ import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 @WebSocket
@@ -27,6 +28,16 @@ public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
     private final DatabaseAuthDAO authDAO = new DatabaseAuthDAO();
     private final DatabaseGameDAO gameDao = new DatabaseGameDAO();
+    private final Map<Integer, String> letters = Map.of(
+            1, "a",
+            2, "b",
+            3, "c",
+            4, "d",
+            5, "e",
+            6, "f",
+            7, "g",
+            8, "h"
+    );
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
@@ -136,6 +147,11 @@ public class WebSocketHandler {
             color = ChessGame.TeamColor.BLACK;
         }
 
+        if (game.game().isGameOver()) {
+            ErrorMessage errorMessage = new ErrorMessage("Game Over");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         if (color != game.game().getTeamTurn()) {
             ErrorMessage errorMessage = new ErrorMessage("Not your turn");
@@ -145,13 +161,6 @@ public class WebSocketHandler {
 
         if (color != game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor()) {
             ErrorMessage errorMessage = new ErrorMessage("Not your piece");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-
-
-        if (game.game().isGameOver()) {
-            ErrorMessage errorMessage = new ErrorMessage("Game Over");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
@@ -173,17 +182,17 @@ public class WebSocketHandler {
         boolean whiteCheckMate = game.game().isInCheckmate(ChessGame.TeamColor.WHITE);
         if (whiteCheckMate) {
             game.game().setGameOver(true);
-            NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.whiteUsername()));
+            NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate by %s", game.whiteUsername(), game.blackUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(checkmate));
         } else if (blackCheckmate) {
             game.game().setGameOver(true);
-            NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate", game.blackUsername()));
+            NotificationMessage checkmate = new NotificationMessage(String.format("%s is in checkmate by %s", game.blackUsername(), game.whiteUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(checkmate));
         } else if (whiteCheck) {
-            NotificationMessage check = new NotificationMessage(String.format("%s is in check", game.whiteUsername()));
+            NotificationMessage check = new NotificationMessage(String.format("%s is in check by %s", game.whiteUsername(), game.blackUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(check));
         } else if (blackCheck) {
-            NotificationMessage check = new NotificationMessage(String.format("%s is in check", game.blackUsername()));
+            NotificationMessage check = new NotificationMessage(String.format("%s is in check by %s", game.blackUsername(), game.whiteUsername()));
             connections.broadcast("", game.gameID(), new Gson().toJson(check));
         }
 
@@ -191,7 +200,19 @@ public class WebSocketHandler {
 
         connections.broadcastMove(game);
 
-        NotificationMessage message = new NotificationMessage(String.format("Move made: %s, %s", move.getStartPosition(), move.getEndPosition()));
+
+        String start = letters.get(move.getStartPosition().getColumn()) + move.getStartPosition().getRow();
+        String end = letters.get(move.getEndPosition().getColumn()) + move.getEndPosition().getRow();
+
+        NotificationMessage message;
+        if (color == ChessGame.TeamColor.WHITE) {
+            message = new NotificationMessage(String.format("Move made by %s: %s, %s", game.whiteUsername(),
+                   start, end));
+        } else {
+            message = new NotificationMessage(String.format("Move made by %s: %s, %s", game.blackUsername(),
+                    start, end));
+        }
+
         String jsonMessage = new Gson().toJson(message);
         connections.broadcast(command.getAuthString(), game.gameID(),jsonMessage);
     }

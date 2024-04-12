@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -177,6 +175,78 @@ public class ChessBoard implements Cloneable {
         return output.toString();
     }
 
+
+    public String highlightMovesWhite(Collection<ChessMove> validMoves, ChessPosition selectedPosition) {
+        StringBuilder output = new StringBuilder();
+        output.append("     a     b     c     d     e     f     g     h\n");
+        output.append("  +-----------------------------------------------+\n");
+
+        for (int i = 8; i >= 1; i--) {
+            output.append(i).append(" |");
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = getPiece(position);
+                boolean isMoveValid = validMoves.contains(new ChessMove(selectedPosition, position, null));
+                boolean isSelected = position.equals(selectedPosition);
+
+                String pieceRepresentation;
+                if (piece == null) {
+                    pieceRepresentation = isMoveValid ? "  *  " : "     ";
+                } else {
+                    String pieceChar = pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType());
+                    if (isSelected) {
+                        pieceRepresentation = "[" + pieceChar + "]";
+                    } else if (isMoveValid) {
+                        pieceRepresentation = "*" + pieceChar + "*";
+                    } else {
+                        pieceRepresentation = " " + pieceChar + " ";
+                    }
+                }
+                output.append(pieceRepresentation).append("|");
+            }
+            output.append(" ").append(i).append("\n");
+        }
+
+        output.append("  +-----------------------------------------------+\n");
+        output.append("     a     b     c     d     e     f     g     h\n");
+        return output.toString();
+    }
+
+    public String highlightMovesBlack(Collection<ChessMove> validMoves, ChessPosition selectedPosition) {
+        StringBuilder output = new StringBuilder();
+        output.append("     h     g     f     e     d     c     b     a\n");
+        output.append("  +-----------------------------------------------+\n");
+
+        for (int i = 1; i <= 8; i++) {
+            output.append(i).append(" |");
+            for (int j = 8; j >= 1; j--) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = getPiece(position);
+                boolean isMoveValid = validMoves.contains(new ChessMove(selectedPosition, position, null));
+                boolean isSelected = position.equals(selectedPosition);
+
+                String pieceRepresentation;
+                if (piece == null) {
+                    pieceRepresentation = isMoveValid ? "  *  " : "     ";
+                } else {
+                    String pieceChar = pieceCharacters.get(piece.getTeamColor()).get(piece.getPieceType());
+                    if (isSelected) {
+                        pieceRepresentation = "[" + pieceChar + "]";
+                    } else if (isMoveValid) {
+                        pieceRepresentation = "*" + pieceChar + "*";
+                    } else {
+                        pieceRepresentation = " " + pieceChar + " ";
+                    }
+                }
+                output.append(pieceRepresentation).append("|");
+            }
+            output.append(" ").append(i).append("\n");
+        }
+
+        output.append("  +-----------------------------------------------+\n");
+        output.append("     h     g     f     e     d     c     b     a\n");
+        return output.toString();
+    }
 
 
     @Override

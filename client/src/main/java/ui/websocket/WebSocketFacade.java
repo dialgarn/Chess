@@ -56,19 +56,23 @@ public class WebSocketFacade extends Endpoint {
                             GameData game = notif.getGame();
                             var teamColor = notif.getTeamColor();
                             if (teamColor == ChessGame.TeamColor.WHITE || playerColor == ChessGame.TeamColor.WHITE) {
+                                System.out.print("\n");
                                 System.out.println(game.game().getBoard().realToStringWhite());
                             } else {
+                                System.out.print("\n");
                                 System.out.println(game.game().getBoard().realToStringBlack());
                             }
                             break;
                         case ERROR:
                             ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+                            System.out.print("\n");
                             System.out.println(errorMessage.getMessage());
                         case NOTIFICATION:
                             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+                            System.out.print("\n");
                             System.out.println(notificationMessage.getMessage());
                     }
-
+                    System.out.print("\r>>> ");
                     messageLatch.countDown();
                 }
             });
